@@ -1,105 +1,161 @@
-// src/features/admin/pages/Clients/components/ClientForm.js
-import React from "react";
+// ClientForm.js
+import React from 'react';
+import { Form, Button, Steps, message } from 'antd';
+import moment from 'moment';
 import {
-  Form,
-  Input,
-  Button,
-  Steps,
-  Select,
-  DatePicker,
-  InputNumber,
-} from "antd";
-import moment from "moment";
+  BasicInfoForm,
+  FormFillerInfo,
+  ClientInfoForm,
+  SiblingForm,
+  ParentForm,
+  ComplaintForm,
+  FileUploadForm,
+} from './components';
 
 const { Step } = Steps;
 
-const EDUCATION = {
-  Preschool: "Preschool",
-  Kindergarten: "Kindergarten",
-  LowerSchool: "LowerSchool",
-  MiddleSchool: "MiddleSchool",
-  HighSchool: "HighSchool",
-  Other: "Other",
-};
-
-const LANGUAGES = {
-  Indonesian: "Indonesian",
-  English: "English",
-  Mandarin: "Mandarin",
-  Other: "Other",
-};
+// We don't need the formatDate function anymore as we're using simpler date formatting
 
 const defaultValues = {
-  email: "test@example.com",
-  password: "Test123!",
-  fullname: "Test User",
+  email: "client.mubashar@example.com",
+  password: "SecurePassword123",
+  fullname: "John Doe",
   formFiller: {
-    identity: "Parent",
-    fullName: "Parent Name",
-    contactNumber: "1234567890",
-    address: "Test Address",
+    identity: "12345",
+    fullName: "Jane Smith",
+    contactNumber: "+123456789",
+    address: "123 Main St, Test City"
   },
   clientInfo: {
-    fullName: "Client Name",
+    fullName: "John Doe",
     gender: "Male",
+    dob: moment("1995-06-15T00:00:00.000Z"),  // Use full ISO string
+    siblingsCount: 3,
+    birthOrder: 2,
     placeOfBirth: "Test City",
+    timeOfBirth: moment("09:00:00", "HH:mm:ss"),
+    age: 29,
     education: "HighSchool",
-    everydayLanguage: ["Indonesian"],
-    age: 25,
-    dob: moment(),
+    educationInstitute: "Test High School",
+    everydayLanguage: ["English", "Indonesian"],
+    religion: "Christianity",
+    siblings: [
+      {
+        name: "Anna Doe",
+        gender: "Female",
+        age: 27,
+        occupation: "Engineer"
+      }
+    ]
   },
   parentInformation: [
     {
-      age: 50,
+      age: 55,
       placeOfBirth: "Test City",
-      siblingsCount: 2,
+      siblingsCount: 4,
+      birthOrder: 2,
       marriageCount: 1,
-      tribe: "Test Tribe",
-      lastEducation: "University",
-      homeAddress: "Test Address",
-      occupation: "Test Job",
-      homePhoneNumber: "1234567890",
-      name: "Parent Name",
-    },
+      relationShip: "Father",
+      tribe: "Tribe A",
+      occupation: "Doctor",
+      homePhoneNumber: "+987654321",
+      name: "Robert Doe",
+      lastEducation: "Master's Degree",
+      homeAddress: "456 Elm St, Test City"
+    }
   ],
   fileUpload: [
     {
-      url: "https://example.com/test.pdf",
-      fileType: "PDF",
-      filename: "test",
-    },
+      filename: "document.pdf",
+      fileType: "application/pdf",
+      url: "https://example.com/document.pdf"
+    }
   ],
+  complaint: [
+    {
+      description: "Frequent headaches and dizziness.",
+      startDate: moment("1995-06-15"),
+      expectations: "Better clarity on health issues",
+      hasPreviousConsultation: true,
+      consultantTypes: ["Psychologist"],
+      previousDiagnosis: "Stress-related disorder"
+    }
+  ]
 };
 
-const ClientForm = ({ onFinish, loading }) => {
+const ClientForm = ({ onFinish, loading = false }) => {
   const [form] = Form.useForm();
   const [current, setCurrent] = React.useState(0);
-  const [formData, setFormData] = React.useState({});
+  const [allFormData, setAllFormData] = React.useState(defaultValues);
 
-  const handleSubmit = (values) => {
-    const payload = {
-      ...formData,
-      ...values,
-      clientInfo: {
-        ...formData.clientInfo,
-        ...values.clientInfo,
-        dob: moment(values.clientInfo?.dob).format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
-        age: parseInt(values.clientInfo?.age),
-      },
-    };
+  const handleSubmit = async () => {
+    try {
+      // Validate current step before submission
+      const currentValues = await form.validateFields();
+      
+      // Get the current form values
+      const currentClientInfo = form.getFieldValue('clientInfo') || {};
+      
+      // Combine all form data
+      const combinedData = {
+        ...allFormData,
+        ...currentValues,
+        clientInfo: {
+          ...allFormData.clientInfo,
+          ...currentClientInfo,
+          // Format as ISO-8601 DateTime string
+          dob: currentClientInfo?.dob ? moment(currentClientInfo.dob).format("YYYY-MM-DDTHH:mm:ss.SSSZ") : null,
+          timeOfBirth: currentClientInfo?.timeOfBirth ? currentClientInfo.timeOfBirth.format("HH:mm:ss") : null,
+        },
+        complaint: (currentValues.complaint || []).map(complaint => ({
+          ...complaint,
+          // Format complaint dates as ISO-8601 DateTime string
+          startDate: complaint.startDate ? moment(complaint.startDate).format("YYYY-MM-DDTHH:mm:ss.SSSZ") : null,
+        })),
+        fileUpload: currentValues.fileUpload || allFormData.fileUpload || [],
+        parentInformation: currentValues.parentInformation || allFormData.parentInformation || defaultValues.parentInformation || [],
+      };
 
-    // Remove password from network logs
-    console.log("Submitting:", { ...payload, password: "[REDACTED]" });
-    onFinish(payload);
+      // Validate required fields before submission
+      if (!combinedData.clientInfo.dob) {
+        throw new Error('Date of Birth is required');
+      }
+
+      // Log the final payload (without sensitive data)
+      console.log("Submitting form data:", {
+        ...combinedData,
+        password: '[REDACTED]'
+      });
+
+      onFinish(combinedData);
+    } catch (error) {
+      console.error("Form submission error:", error);
+      message.error(error.message || "Please check all required fields");
+    }
   };
 
   const next = async () => {
     try {
+      // Validate current step
       const values = await form.validateFields();
-      setFormData((prev) => ({ ...prev, ...values }));
+      
+      // Update the accumulated form data
+      setAllFormData(prev => ({
+        ...prev,
+        ...values,
+        clientInfo: {
+          ...prev.clientInfo,
+          ...values.clientInfo
+        },
+        parentInformation: values.parentInformation || prev.parentInformation,
+        complaint: values.complaint || prev.complaint,
+        fileUpload: values.fileUpload || prev.fileUpload,
+      }));
+
       setCurrent(current + 1);
     } catch (error) {
       console.error("Validation failed:", error);
+      message.error("Please fill in all required fields");
     }
   };
 
@@ -107,147 +163,52 @@ const ClientForm = ({ onFinish, loading }) => {
     setCurrent(current - 1);
   };
 
+  // Save form data on every change
+  const handleFormChange = (changedValues, allValues) => {
+    setAllFormData(prev => ({
+      ...prev,
+      ...allValues,
+      clientInfo: {
+        ...prev.clientInfo,
+        ...allValues.clientInfo
+      },
+      parentInformation: allValues.parentInformation || prev.parentInformation || defaultValues.parentInformation,
+      complaint: allValues.complaint || prev.complaint || [],
+      fileUpload: allValues.fileUpload || prev.fileUpload || [],
+    }));
+  };
+
   const steps = [
     {
       title: "Basic Info",
-      content: (
-        <>
-          <Form.Item
-            name="email"
-            label="Email"
-            rules={[
-              {
-                required: true,
-                type: "email",
-                message: "Please enter a valid email",
-              },
-            ]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
-            name="password"
-            label="Password"
-            rules={[{ required: true, message: "Password is required" }]}
-          >
-            <Input.Password />
-          </Form.Item>
-          <Form.Item
-            name="fullname"
-            label="Full Name"
-            rules={[{ required: true, message: "Full name is required" }]}
-          >
-            <Input />
-          </Form.Item>
-        </>
-      ),
+      content: <BasicInfoForm />
     },
     {
       title: "Form Filler",
-      content: (
-        <>
-          <Form.Item
-            name={["formFiller", "identity"]}
-            label="Identity"
-            rules={[{ required: true }]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
-            name={["formFiller", "fullName"]}
-            label="Full Name"
-            rules={[{ required: true }]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
-            name={["formFiller", "contactNumber"]}
-            label="Contact Number"
-            rules={[{ required: true }]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
-            name={["formFiller", "address"]}
-            label="Address"
-            rules={[{ required: true }]}
-          >
-            <Input.TextArea />
-          </Form.Item>
-        </>
-      ),
+      content: <FormFillerInfo />
     },
     {
       title: "Client Info",
       content: (
         <>
-          <Form.Item
-            name={["clientInfo", "fullName"]}
-            label="Full Name"
-            rules={[{ required: true }]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
-            name={["clientInfo", "gender"]}
-            label="Gender"
-            rules={[{ required: true }]}
-          >
-            <Select>
-              <Select.Option value="Male">Male</Select.Option>
-              <Select.Option value="Female">Female</Select.Option>
-            </Select>
-          </Form.Item>
-          <Form.Item
-            name={["clientInfo", "dob"]}
-            label="Date of Birth"
-            rules={[{ required: true }]}
-          >
-            <DatePicker style={{ width: "100%" }} format="YYYY-MM-DD" />
-          </Form.Item>
-          <Form.Item
-            name={["clientInfo", "age"]}
-            label="Age"
-            rules={[{ required: true }]}
-          >
-            <InputNumber style={{ width: "100%" }} />
-          </Form.Item>
-          <Form.Item
-            name={["clientInfo", "placeOfBirth"]}
-            label="Place of Birth"
-            rules={[{ required: true }]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
-            name={["clientInfo", "education"]}
-            label="Education"
-            rules={[{ required: true }]}
-          >
-            <Select>
-              {Object.values(EDUCATION).map((edu) => (
-                <Select.Option key={edu} value={edu}>
-                  {edu}
-                </Select.Option>
-              ))}
-            </Select>
-          </Form.Item>
-          <Form.Item
-            name={["clientInfo", "everydayLanguage"]}
-            label="Languages"
-            rules={[{ required: true }]}
-          >
-            <Select mode="multiple">
-              {Object.values(LANGUAGES).map((lang) => (
-                <Select.Option key={lang} value={lang}>
-                  {lang}
-                </Select.Option>
-              ))}
-            </Select>
-          </Form.Item>
+          <ClientInfoForm />
+          <h3>Siblings Information</h3>
+          <SiblingForm />
         </>
-      ),
+      )
     },
+    {
+      title: "Parent Info",
+      content: <ParentForm />
+    },
+    {
+      title: "Complaints",
+      content: <ComplaintForm />
+    },
+    {
+      title: "Documents",
+      content: <FileUploadForm />
+    }
   ];
 
   return (
@@ -256,9 +217,7 @@ const ClientForm = ({ onFinish, loading }) => {
       onFinish={handleSubmit}
       layout="vertical"
       initialValues={defaultValues}
-      onValuesChange={(_, allValues) => {
-        setFormData((prev) => ({ ...prev, ...allValues }));
-      }}
+      onValuesChange={handleFormChange}
     >
       <Steps current={current} style={{ marginBottom: 24 }}>
         {steps.map((item) => (
@@ -266,9 +225,11 @@ const ClientForm = ({ onFinish, loading }) => {
         ))}
       </Steps>
 
-      <div>{steps[current].content}</div>
+      <div className="steps-content" style={{ minHeight: '400px' }}>
+        {steps[current].content}
+      </div>
 
-      <div style={{ marginTop: 24 }}>
+      <div style={{ marginTop: 24 }} className="steps-action">
         {current > 0 && (
           <Button style={{ marginRight: 8 }} onClick={prev}>
             Previous

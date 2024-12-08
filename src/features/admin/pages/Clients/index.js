@@ -15,7 +15,7 @@ const ClientsPage = () => {
 
   const fetchClients = async () => {
     try {
-      const data = await getClients('Test User');
+      const data = await getClients();
       setClients(data);
     } catch (error) {
       message.error("Failed to fetch clients");
@@ -39,17 +39,17 @@ const ClientsPage = () => {
   const columns = [
     {
       title: "Name",
-      dataIndex: "fullname",
+      dataIndex: ["user", "fullname"],
       key: "fullname",
     },
     {
       title: "Email",
-      dataIndex: "email",
+      dataIndex: ["user", "email"],
       key: "email",
     },
     {
       title: "Created At",
-      dataIndex: "createdAt",
+      dataIndex: ["user", "createdAt"],
       key: "createdAt",
       render: (date) => new Date(date).toLocaleDateString(),
     },
