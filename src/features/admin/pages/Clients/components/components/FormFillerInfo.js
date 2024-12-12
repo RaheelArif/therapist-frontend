@@ -8,7 +8,7 @@ import {
   Switch,
   TimePicker,
 } from "antd";
-
+import { FillerIdentity, Language, Education , getEnumValues } from './constants';
 const FormFillerInfo = () => (
   <>
     <Form.Item
@@ -16,7 +16,14 @@ const FormFillerInfo = () => (
       label="Identity"
       rules={[{ required: true }]}
     >
-      <Input />
+      <Select>
+        {getEnumValues(FillerIdentity).map((identity) => (
+          <Select.Option key={identity} value={identity}>
+            {identity}
+          </Select.Option>
+        ))}
+      </Select>
+   
     </Form.Item>
     <Form.Item
       name={["formFiller", "fullName"]}

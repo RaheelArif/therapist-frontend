@@ -17,11 +17,11 @@ const { Step } = Steps;
 // We don't need the formatDate function anymore as we're using simpler date formatting
 
 const defaultValues = {
-  email: "client.mubashar@example.com",
+  email: "client.1@example.com",
   password: "SecurePassword123",
   fullname: "John Doe",
   formFiller: {
-    identity: "12345",
+    identity: "Mom",
     fullName: "Jane Smith",
     contactNumber: "+123456789",
     address: "123 Main St, Test City"

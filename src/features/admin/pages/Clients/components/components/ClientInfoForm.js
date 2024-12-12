@@ -1,6 +1,6 @@
 import React from "react";
 import { DatePicker, Form, Input, InputNumber, Select, TimePicker } from "antd";
-import { Gender, Language, Education , getEnumValues } from './constants';
+import { Gender, Language, Education, getEnumValues } from "./constants";
 const ClientInfoForm = () => (
   <>
     <Form.Item
@@ -45,46 +45,18 @@ const ClientInfoForm = () => (
       <InputNumber style={{ width: "100%" }} />
     </Form.Item>
     <Form.Item
-      name={["clientInfo", "placeOfBirth"]}
-      label="Place of Birth"
+      name={["clientInfo", "education"]}
+      label="Education"
       rules={[{ required: true }]}
     >
-      <Input />
+      <Select>
+        {getEnumValues(Education).map((edu) => (
+          <Select.Option key={edu} value={edu}>
+            {edu}
+          </Select.Option>
+        ))}
+      </Select>
     </Form.Item>
-    <Form.Item
-      name={["clientInfo", "siblingsCount"]}
-      label="Number of Siblings"
-      rules={[{ required: true }]}
-    >
-      <InputNumber style={{ width: "100%" }} min={0} />
-    </Form.Item>
-    <Form.Item
-      name={["clientInfo", "birthOrder"]}
-      label="Birth Order"
-      rules={[{ required: true }]}
-    >
-      <InputNumber style={{ width: "100%" }} min={1} />
-    </Form.Item>
-    <Form.Item
-      name={["clientInfo", "religion"]}
-      label="Religion"
-      rules={[{ required: true }]}
-    >
-      <Input />
-    </Form.Item>
-    <Form.Item
-  name={['clientInfo', 'education']}
-  label="Education"
-  rules={[{ required: true }]}
->
-  <Select>
-    {getEnumValues(Education).map((edu) => (
-      <Select.Option key={edu} value={edu}>
-        {edu}
-      </Select.Option>
-    ))}
-  </Select>
-</Form.Item>
     <Form.Item
       name={["clientInfo", "educationInstitute"]}
       label="Education Institute"
@@ -104,6 +76,34 @@ const ClientInfoForm = () => (
           </Select.Option>
         ))}
       </Select>
+    </Form.Item>
+    <Form.Item
+      name={["clientInfo", "placeOfBirth"]}
+      label="Place of Birth"
+      rules={[{ required: true }]}
+    >
+      <Input />
+    </Form.Item>
+    <Form.Item
+      name={["clientInfo", "religion"]}
+      label="Religion"
+      rules={[{ required: true }]}
+    >
+      <Input />
+    </Form.Item>
+    <Form.Item
+      name={["clientInfo", "siblingsCount"]}
+      label="Number of Siblings"
+      rules={[{ required: true }]}
+    >
+      <InputNumber style={{ width: "100%" }} min={0} />
+    </Form.Item>
+    <Form.Item
+      name={["clientInfo", "birthOrder"]}
+      label="Birth Order"
+      rules={[{ required: true }]}
+    >
+      <InputNumber style={{ width: "100%" }} min={1} />
     </Form.Item>
   </>
 );

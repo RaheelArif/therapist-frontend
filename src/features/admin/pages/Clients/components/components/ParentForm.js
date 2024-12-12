@@ -95,16 +95,25 @@ const ParentForm = () => (
             </Form.Item>
             <Form.Item
               {...restField}
-              name={[name, "occupation"]}
-              label="Occupation"
+              name={[name, "lastEducation"]}
+              label="Last Education"
               rules={[{ required: true }]}
             >
               <Input />
             </Form.Item>
             <Form.Item
               {...restField}
-              name={[name, "lastEducation"]}
-              label="Last Education"
+              name={[name, "occupation"]}
+              label="Occupation"
+              rules={[{ required: true }]}
+            >
+              <Input />
+            </Form.Item>
+           
+            <Form.Item
+              {...restField}
+              name={[name, "homePhoneNumber"]}
+              label="Home Phone Number"
               rules={[{ required: true }]}
             >
               <Input />
@@ -116,14 +125,6 @@ const ParentForm = () => (
               rules={[{ required: true }]}
             >
               <Input.TextArea />
-            </Form.Item>
-            <Form.Item
-              {...restField}
-              name={[name, "homePhoneNumber"]}
-              label="Home Phone Number"
-              rules={[{ required: true }]}
-            >
-              <Input />
             </Form.Item>
             <Button type="link" onClick={() => remove(name)} block>
               Remove Parent
