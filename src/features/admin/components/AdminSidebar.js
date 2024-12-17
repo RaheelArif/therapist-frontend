@@ -2,7 +2,7 @@ import React from "react";
 import { Layout, Menu } from "antd";
 import { UserOutlined, TeamOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
-// import logo from "../../../assets/images/MS high res.pdf";
+import logo from "../../../assets/images/logo-ms.png";
 
 const { Sider } = Layout;
 
@@ -20,29 +20,24 @@ const AdminSidebar = () => {
       icon: <TeamOutlined />,
       label: "Therapists",
     },
+    {
+      key: "/admin/admins",
+      icon: <TeamOutlined />,
+      label: "Admins",
+    },
   ];
 
   return (
-    <Sider>
-      {/* <embed
-        src={logo}
-        type="application/pdf"
-        frameBorder="0"
-        scrolling="auto"
-     
-        width="100%"
-      ></embed> */}
+    <Sider style={{ backgroundColor: "white" }}>
+      <div className="logo-area-c" onClick={() => navigate("/admin")}>
+        <img
+          src={logo}
+          alt="Logo"
+          style={{ cursor: "pointer", width: "100%", height: "auto" }}
+        />
+      </div>
 
-      <div
-        className="logo"
-        style={{
-          height: 32,
-          margin: 16,
-          background: "rgba(255, 255, 255, 0.2)",
-        }}
-      />
       <Menu
-        theme="dark"
         mode="inline"
         items={items}
         onClick={({ key }) => navigate(key)}

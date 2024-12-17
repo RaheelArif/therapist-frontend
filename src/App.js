@@ -5,7 +5,7 @@ import { store } from './store/store';
 import LoginForm from './features/auth/LoginForm';
 import { AdminRoutes } from './features/admin/routes';
 import { useSelector } from 'react-redux';
-
+import "./App.css"
 const PrivateRoute = ({ children, role }) => {
   const { isAuthenticated, role: userRole } = useSelector((state) => state.auth);
   
