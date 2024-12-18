@@ -6,7 +6,7 @@ import startOfWeek from "date-fns/startOfWeek";
 import getDay from "date-fns/getDay";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { Card, Select, Modal, Button, Typography, message } from "antd";
-import { parseTimeRange } from "../../../../utils/timeHelpers";
+
 import AppointmentModal from "./components/AppointmentModal";
 
 const { Text } = Typography;
@@ -91,58 +91,48 @@ const AppointmentsPage = () => {
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [loading, setLoading] = useState(false);
 
-
-
-
- 
-
- 
-
   const generateAvailableSlots = () => {
     if (!selectedTherapist?.availableHours) return [];
 
     const slots = [];
     const currentDate = new Date();
-    const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    const dayNames = [
+      "sunday",
+      "monday",
+      "tuesday",
+      "wednesday",
+      "thursday",
+      "friday",
+      "saturday",
+    ];
 
     // Generate slots for next 30 days
     for (let i = 0; i < 30; i++) {
       const date = new Date(currentDate);
       date.setDate(currentDate.getDate() + i);
-      
+
       const dayName = dayNames[date.getDay()];
-      
+
       if (selectedTherapist.availableHours[dayName]) {
         const [startHour, endHour] = selectedTherapist.availableHours[dayName]
-          .split('-')
+          .split("-")
           .map(Number);
 
         const adjustedEndHour = endHour < startHour ? endHour + 12 : endHour;
-        
-        for (let hour = startHour; hour < adjustedEndHour; hour++) {
-          const slotStart = new Date(date);
-          slotStart.setHours(hour, 0, 0, 0);
-          
-          const slotEnd = new Date(date);
-          slotEnd.setHours(hour + 1, 0, 0, 0);
-          
-          const isBooked = selectedTherapist.appointments?.some(apt => {
-            const aptStart = new Date(apt.startTime);
-            return aptStart.getTime() === slotStart.getTime();
-          });
 
-          if (!isBooked) {
-            const startTime = hour < 12 ? `${hour}:00 AM` : `${hour-12 || 12}:00 PM`;
-            const endTime = (hour+1) < 12 ? `${hour+1}:00 AM` : `${(hour+1)-12 || 12}:00 PM`;
-            
-            slots.push({
-              title: `Available (${startTime} - ${endTime})`,
-              start: slotStart,
-              end: slotEnd,
-              type: "available"
-            });
-          }
-        }
+        // Create a single available block for the day
+        const dayStart = new Date(date);
+        dayStart.setHours(startHour, 0, 0, 0);
+
+        const dayEnd = new Date(date);
+        dayEnd.setHours(adjustedEndHour, 0, 0, 0);
+
+        slots.push({
+          title: `Available (${startHour}:00 - ${endHour}:00)`,
+          start: dayStart,
+          end: dayEnd,
+          type: "available",
+        });
       }
     }
     return slots;
@@ -153,7 +143,7 @@ const AppointmentsPage = () => {
       // When clicking an available slot
       setSelectedSlot({
         start: event.start,
-        end: event.end
+        end: event.end,
       });
       setShowNewAppointmentDialog(true);
     } else if (event.type === "appointment") {
@@ -192,49 +182,55 @@ const AppointmentsPage = () => {
     }
   };
 
+  // Inside AppointmentsPage component
 
-// Inside AppointmentsPage component
+  const handleCreateAppointment = async (appointmentData) => {
+    if (!selectedClient || !appointmentData) return;
 
-const handleCreateAppointment = async (appointmentData) => {
-  if (!selectedClient || !appointmentData) return;
+    try {
+      setLoading(true);
 
-  try {
-    setLoading(true);
-    const newAppointment = {
-      id: Date.now().toString(),
-      clientId: selectedClient.id,
-      clientName: selectedClient.user.fullname,
-      startTime: appointmentData.start.toISOString(),
-      endTime: appointmentData.end.toISOString(),
-      status: "SCHEDULED",
-      createdAt: new Date().toISOString(),
-    };
+      // Use the actual start and end times from the drag selection
+      const newAppointment = {
+        id: Date.now().toString(),
+        clientId: selectedClient.id,
+        clientName: selectedClient.user.fullname,
+        startTime: appointmentData.start.toISOString(),
+        endTime: appointmentData.end.toISOString(), // Use the actual end time
+        status: "SCHEDULED",
+        createdAt: new Date().toISOString(),
+      };
 
-    // Check for booking conflicts
-    const isTimeSlotTaken = selectedTherapist.appointments?.some(apt => {
-      const aptStart = new Date(apt.startTime);
-      return aptStart.getTime() === appointmentData.start.getTime();
-    });
+      // Check for booking conflicts
+      const hasConflict = selectedTherapist.appointments?.some((apt) => {
+        const aptStart = new Date(apt.startTime);
+        const aptEnd = new Date(apt.endTime);
+        return (
+          (appointmentData.start >= aptStart &&
+            appointmentData.start < aptEnd) ||
+          (appointmentData.end > aptStart && appointmentData.end <= aptEnd)
+        );
+      });
 
-    if (isTimeSlotTaken) {
-      message.error('This time slot is already booked');
-      return;
+      if (hasConflict) {
+        message.error("This time slot conflicts with an existing appointment");
+        return;
+      }
+
+      // Add to therapist's appointments array
+      setSelectedTherapist((prev) => ({
+        ...prev,
+        appointments: [...(prev.appointments || []), newAppointment],
+      }));
+
+      message.success("Appointment created successfully");
+      setShowNewAppointmentDialog(false);
+    } catch (error) {
+      message.error("Failed to create appointment");
+    } finally {
+      setLoading(false);
     }
-
-    // Add to therapist's appointments array
-    setSelectedTherapist((prev) => ({
-      ...prev,
-      appointments: [...(prev.appointments || []), newAppointment],
-    }));
-
-    message.success("Appointment created successfully");
-    setShowNewAppointmentDialog(false);
-  } catch (error) {
-    message.error("Failed to create appointment");
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   // Mock clients for testing
   const MOCK_CLIENTS = [
@@ -258,177 +254,177 @@ const handleCreateAppointment = async (appointmentData) => {
     },
   ];
 
- 
-  
- 
-  
   const eventStyleGetter = (event) => {
     let style = {
       backgroundColor: "#1890ff", // antd primary blue for appointments
     };
-  
+
     if (event.type === "available") {
       style.backgroundColor = "#52c41a"; // antd success green for available slots
     }
-  
+
     if (event.status === "CANCELLED") {
       style.backgroundColor = "#f5222d"; // antd error red for cancelled
     }
-  
+
     return { style };
   };
-
-
-  const dayPropGetter = (date) => {
-    const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-    const dayName = dayNames[date.getDay()];
-    
-    if (selectedTherapist?.availableHours[dayName]) {
-      return {
-        className: 'available-day',
-        style: {
-          backgroundColor: 'rgba(82, 196, 26, 0.1)', // Light green for available days
-        }
-      };
-    }
-    return {
-      className: 'unavailable-day',
-      style: {
-        backgroundColor: 'rgba(245, 34, 45, 0.1)', // Light red for unavailable days
-      }
-    };
-  };
-
   const handleSelectSlot = (slotInfo) => {
-    console.log('Slot selected:', slotInfo);
-    
-    // Create a date from the clicked slot
     const selectedDate = new Date(slotInfo.start);
-    const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    const dayNames = [
+      "sunday",
+      "monday",
+      "tuesday",
+      "wednesday",
+      "thursday",
+      "friday",
+      "saturday",
+    ];
     const dayName = dayNames[selectedDate.getDay()];
-  
+
     // Check if therapist works on this day
     if (!selectedTherapist?.availableHours[dayName]) {
-      message.warning('Therapist is not available on this day');
+      message.warning("Therapist is not available on this day");
       return;
     }
-  
-    // Parse the available hours for that day (e.g., "9-5" becomes { start: 9, end: 17 })
-    const timeRange = selectedTherapist.availableHours[dayName];
-    const [startHour, endHour] = timeRange.split('-').map(Number);
-  
+
+    // Get available hours for that day
+    const [startHour, endHour] = selectedTherapist.availableHours[dayName]
+      .split("-")
+      .map(Number);
+
     // Convert endHour if it's in 12-hour format
     const adjustedEndHour = endHour < startHour ? endHour + 12 : endHour;
-  
+
     // Create Date objects for the available time range
     const availableStart = new Date(selectedDate);
     availableStart.setHours(startHour, 0, 0, 0);
-  
+
     const availableEnd = new Date(selectedDate);
     availableEnd.setHours(adjustedEndHour, 0, 0, 0);
-  
-    // Check if clicked time is within available hours
-    if (selectedDate < availableStart || selectedDate >= availableEnd) {
-      message.warning(`Available hours for ${dayName} are ${startHour}:00 AM - ${endHour}:00 PM`);
+
+    // Check if selected time range is within available hours
+    if (slotInfo.start < availableStart || slotInfo.end > availableEnd) {
+      message.warning(
+        `Available hours for ${dayName} are ${startHour}:00 AM - ${endHour}:00 PM`
+      );
       return;
     }
-  
-    // Round to nearest hour
-    const roundedStart = new Date(selectedDate);
-    roundedStart.setMinutes(0, 0, 0);
-  
-    const roundedEnd = new Date(roundedStart);
-    roundedEnd.setHours(roundedStart.getHours() + 1);
-  
-    // Check if slot is already booked
-    const isBooked = selectedTherapist.appointments?.some(apt => {
+
+    // Check for conflicts with existing appointments
+    const hasConflict = selectedTherapist.appointments?.some((apt) => {
       const aptStart = new Date(apt.startTime);
-      return aptStart.getTime() === roundedStart.getTime();
+      const aptEnd = new Date(apt.endTime);
+      return (
+        (slotInfo.start >= aptStart && slotInfo.start < aptEnd) ||
+        (slotInfo.end > aptStart && slotInfo.end <= aptEnd)
+      );
     });
-  
-    if (isBooked) {
-      message.warning('This time slot is already booked');
+
+    if (hasConflict) {
+      message.warning("This time slot conflicts with an existing appointment");
       return;
     }
-  
-    console.log('Setting slot:', {
-      start: roundedStart,
-      end: roundedEnd
-    });
-  
-    // Set slot and open modal
-    setSelectedSlot({
-      start: roundedStart,
-      end: roundedEnd
-    });
+
+    setSelectedSlot(slotInfo);
     setShowNewAppointmentDialog(true);
   };
-  
-  // Update the generateAvailableSlots function as well
- 
 
-  const calendarEvents = [
-    ...(selectedTherapist.appointments?.map((apt) => ({
-      id: apt.id,
-      title: `${apt.clientName}`,
-      start: new Date(apt.startTime),
-      end: new Date(apt.endTime),
-      status: apt.status,
-      type: "appointment",
-    })) || []),
-    ...generateAvailableSlots(),
-  ];
+  const customComponents = {
+    timeSlotWrapper: ({ children, value }) => (
+      <div title={format(value, "h:mm a")} style={{ height: "100%" }}>
+        {children}
+      </div>
+    ),
+  };
   return (
     <div className="p-6">
-    <Card title="Appointments Management">
-      <div className="mb-4">
-        <Text className="block mb-2">
-          Selected Therapist: {selectedTherapist.user.fullname}
-        </Text>
-        <Text className="block mb-4 text-gray-500">
-          Click on any green "Available" slot to create an appointment
-        </Text>
-      </div>
+      <Card title="Appointments Management">
+        <div className="mb-4">
+          <Text className="block mb-2">
+            Selected Therapist: {selectedTherapist.user.fullname}
+          </Text>
+          <Text className="block mb-4 text-gray-500">
+            Click on any green "Available" slot to create an appointment
+          </Text>
+        </div>
 
-      <Calendar
-        localizer={localizer}
-        events={[
-          ...(selectedTherapist.appointments?.map((apt) => ({
-            id: apt.id,
-            title: `${apt.clientName}`,
-            start: new Date(apt.startTime),
-            end: new Date(apt.endTime),
-            status: apt.status,
-            type: "appointment",
-          })) || []),
-          ...generateAvailableSlots(),
-        ]}
-        startAccessor="start"
-        endAccessor="end"
-        style={{ height: 700 }}
-        onSelectEvent={handleSelectEvent}
-        eventPropGetter={eventStyleGetter}
-        views={["week", "day"]}
-        defaultView="week"
-        min={new Date(2024, 0, 1, 8, 0)} // Start at 8 AM
-        max={new Date(2024, 0, 1, 18, 0)} // End at 6 PM
-        step={60}
-        timeslots={1}
+        <Calendar
+          localizer={localizer}
+          events={[
+            ...(selectedTherapist.appointments?.map((apt) => ({
+              id: apt.id,
+              title: `${apt.clientName}`,
+              start: new Date(apt.startTime),
+              end: new Date(apt.endTime),
+              status: apt.status,
+              type: "appointment",
+            })) || []),
+            ...generateAvailableSlots(),
+          ]}
+          startAccessor="start"
+          endAccessor="end"
+          style={{ height: 700 }}
+          onSelectEvent={handleSelectEvent}
+          onSelectSlot={handleSelectSlot}
+          eventPropGetter={eventStyleGetter}
+          views={["month", "week", "day"]}
+          defaultView="week"
+          min={new Date(2024, 0, 1, 8, 0)}
+          max={new Date(2024, 0, 1, 18, 0)}
+          step={15}
+          timeslots={4}
+          selectable={true}
+          longPressThreshold={10}
+          tooltipAccessor={(event) => {
+            if (event.type === "available") {
+              return `Click to schedule (${format(
+                event.start,
+                "h:mm a"
+              )} - ${format(event.end, "h:mm a")})`;
+            }
+            return `${event.title}: ${format(event.start, "h:mm a")} - ${format(
+              event.end,
+              "h:mm a"
+            )}`;
+          }}
+          components={customComponents}
+          formats={{
+            timeGutterFormat: (date, culture, localizer) =>
+              localizer.format(date, "h:mm a", culture),
+            eventTimeRangeFormat: ({ start, end }, culture, localizer) =>
+              `${localizer.format(
+                start,
+                "h:mm a",
+                culture
+              )} - ${localizer.format(end, "h:mm a", culture)}`,
+            selectRangeFormat: ({ start, end }, culture, localizer) =>
+              `${localizer.format(
+                start,
+                "h:mm a",
+                culture
+              )} - ${localizer.format(end, "h:mm a", culture)}`,
+          }}
+          dayPropGetter={(date) => ({
+            style: {
+              cursor: "pointer",
+            },
+          })}
+        />
+      </Card>
+
+      <AppointmentModal
+        open={showNewAppointmentDialog}
+        onCancel={() => setShowNewAppointmentDialog(false)}
+        onSubmit={handleCreateAppointment}
+        selectedSlot={selectedSlot}
+        selectedClient={selectedClient}
+        setSelectedClient={setSelectedClient}
+        therapist={selectedTherapist}
+        clients={MOCK_CLIENTS}
+        loading={loading}
       />
-    </Card>
-
-    <AppointmentModal
-      open={showNewAppointmentDialog}
-      onCancel={() => setShowNewAppointmentDialog(false)}
-      onSubmit={handleCreateAppointment}
-      selectedSlot={selectedSlot}
-      selectedClient={selectedClient}
-      setSelectedClient={setSelectedClient}
-      therapist={selectedTherapist}
-      clients={MOCK_CLIENTS}
-      loading={loading}
-    />
-  </div>
+    </div>
   );
 };
 
