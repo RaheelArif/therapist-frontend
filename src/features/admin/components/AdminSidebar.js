@@ -25,6 +25,11 @@ const AdminSidebar = () => {
       icon: <TeamOutlined />,
       label: "Admins",
     },
+    {
+      key: "/admin/appointments",
+      icon: <TeamOutlined />,
+      label: "Appointments",
+    },
   ];
 
   return (

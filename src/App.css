@@ -6,3 +6,9 @@
 .logo-area-c img {
   width: 100%;
 }
+.available-day {
+  border: 1px solid #52c41a !important;
+}
+.unavailable-day {
+  border: 1px solid #f5222d !important;
+}
