@@ -1,9 +1,11 @@
 import React from 'react';
-import { Modal, Select, Button, Typography, Alert, Space } from 'antd';
+import { Modal, Select, Button, Typography, Alert, Space, Badge } from 'antd';
 import { format } from 'date-fns';
 import { differenceInMinutes } from 'date-fns';
+import { CalendarOutlined, UserOutlined, ClockCircleOutlined } from '@ant-design/icons';
 
-const { Text } = Typography;
+
+const { Text, Title } = Typography;
 const { Option } = Select;
 
 const AppointmentModal = ({
@@ -52,81 +54,102 @@ const AppointmentModal = ({
 
   return (
     <Modal
-      title="Create New Appointment"
-      open={open}
-      onCancel={onCancel}
-      footer={[
-        <Button key="back" onClick={onCancel}>
-          Cancel
-        </Button>,
-        <Button
-          key="submit"
-          type="primary"
-          onClick={handleSubmit}
-          disabled={!selectedClient || !selectedSlot || loading}
-          loading={loading}
-        >
-          Create Appointment
-        </Button>,
-      ]}
-    >
-      <div className="space-y-4 py-4">
-        {/* Selected Time Information */}
-        {selectedSlot && (
-          <Space direction="vertical" className="w-full">
-            <Alert
-              message="Selected Time Slot"
-              description={
-                <div className="space-y-2">
-                  <div><Text strong>Date:</Text> {format(selectedSlot.start, "PPPP")}</div>
-                  <div>
-                    <Text strong>Time:</Text> {format(selectedSlot.start, "h:mm a")} - {format(selectedSlot.end, "h:mm a")}
-                  </div>
-                  <div><Text strong>Duration:</Text> {getDurationText()}</div>
-                </div>
-              }
-              type="info"
-              showIcon
+    title={
+      <div className="modal-header">
+        <CalendarOutlined className="modal-header-icon" />
+        <span>Schedule New Appointment</span>
+      </div>
+    }
+    open={open}
+    onCancel={onCancel}
+    footer={[
+      <Button key="back" onClick={onCancel} className="cancel-btn">
+        Cancel
+      </Button>,
+      <Button
+        key="submit"
+        type="primary"
+        onClick={handleSubmit}
+        disabled={!selectedClient || !selectedSlot || loading}
+        loading={loading}
+        className="submit-btn"
+      >
+        Create Appointment
+      </Button>,
+    ]}
+    className="appointment-modal"
+    width={600}
+  >
+    <div className="appointment-modal-content">
+      {/* Time Slot Section */}
+      {selectedSlot && (
+        <div className="time-slot-section">
+          <div className="date-display">
+            <Title level={4}>{format(selectedSlot.start, "EEEE, MMMM d, yyyy")}</Title>
+            <Badge 
+              status="processing" 
+              text={getDurationText()} 
+              className="duration-badge"
             />
-          </Space>
-        )}
+          </div>
 
-        {/* Client selection */}
-        <div className="mb-4">
-          <Text strong className="block mb-2">Select Client</Text>
-          <Select
-            style={{ width: '100%' }}
-            placeholder="Select Client"
-            value={selectedClient?.id}
-            onChange={(value) => setSelectedClient(clients.find(c => c.id === value))}
-          >
-            {clients.map((client) => (
-              <Option key={client.id} value={client.id}>
-                {client.user.fullname}
-              </Option>
-            ))}
-          </Select>
+          <div className="time-display">
+            <ClockCircleOutlined />
+            <Text>
+              {format(selectedSlot.start, "h:mm a")} - {format(selectedSlot.end, "h:mm a")}
+            </Text>
+          </div>
         </div>
-        
-        {/* Therapist information */}
-        <div className="mt-6 pt-4 border-t">
-          <Space direction="vertical" className="w-full">
-            <div>
-              <Text type="secondary" strong>Therapist:</Text>
-              <Text type="secondary"> {therapist.user.fullname}</Text>
-            </div>
-            <div>
-              <Text type="secondary" strong>Specialization:</Text>
-              <Text type="secondary"> {therapist.specializations.type} - {therapist.specializations.focus}</Text>
-            </div>
-            <div>
-              <Text type="secondary" strong>Working Hours ({getDayName()}):</Text>
-              <Text type="secondary"> {therapist.availableHours[getDayName().toLowerCase()]}</Text>
-            </div>
-          </Space>
+      )}
+
+      {/* Client Selection Section */}
+      <div className="client-section">
+        <Title level={5}>
+          <UserOutlined /> Select Client
+        </Title>
+        <Select
+          className="client-select"
+          placeholder="Choose a client for this appointment"
+          value={selectedClient?.id}
+          onChange={(value) => setSelectedClient(clients.find(c => c.id === value))}
+        >
+          {clients.map((client) => (
+            <Option key={client.id} value={client.id}>
+              <div className="client-option">
+                <UserOutlined className="client-icon" />
+                <span>{client.user.fullname}</span>
+              </div>
+            </Option>
+          ))}
+        </Select>
+      </div>
+      
+      {/* Therapist Info Section */}
+      <div className="therapist-section">
+        <div className="therapist-header">
+          <img 
+            src={therapist.profilePicture || 'https://via.placeholder.com/40'} 
+            alt={therapist.user.fullname}
+            className="therapist-avatar"
+          />
+          <div className="therapist-info">
+            <Text strong>{therapist.user.fullname}</Text>
+            <Text type="secondary">{therapist.specializations.type}</Text>
+          </div>
+        </div>
+        <div className="therapist-details">
+          <div className="detail-item">
+            <Text strong>Focus:</Text>
+            <Text>{therapist.specializations.focus}</Text>
+          </div>
+          <div className="detail-item">
+            <Text strong>Working Hours:</Text>
+            <Text>{therapist.availableHours[format(selectedSlot?.start || new Date(), 'EEEE').toLowerCase()] || 'N/A'}</Text>
+          </div>
         </div>
       </div>
-    </Modal>
+    </div>
+  </Modal>
   );
 };
 

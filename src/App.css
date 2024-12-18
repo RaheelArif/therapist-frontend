@@ -12,3 +12,183 @@
 .unavailable-day {
   border: 1px solid #f5222d !important;
 }
+
+/* AppointmentModal.css */
+
+.appointment-modal .ant-modal-content {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.appointment-modal .ant-modal-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.modal-header-icon {
+  font-size: 20px;
+  color: #1890ff;
+}
+
+.appointment-modal-content {
+  padding: 20px 0;
+}
+
+/* Time Slot Section */
+.time-slot-section {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+}
+
+.date-display {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.date-display h4 {
+  margin: 0;
+}
+
+.duration-badge {
+  background: #e6f7ff;
+  padding: 4px 12px;
+  border-radius: 16px;
+}
+
+.time-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #666;
+}
+
+/* Client Section */
+.client-section {
+  padding: 0 24px;
+  margin-bottom: 24px;
+}
+
+.client-section h5 {
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.client-select {
+  width: 100%;
+}
+
+.client-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.client-icon {
+  color: #1890ff;
+}
+
+/* Therapist Section */
+.therapist-section {
+  background: #fafafa;
+  padding: 20px 24px;
+  border-radius: 8px;
+  margin: 0 24px;
+}
+
+.therapist-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.therapist-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.therapist-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.therapist-details {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.detail-item {
+  display: flex;
+  gap: 8px;
+}
+
+/* Button Styles */
+.submit-btn {
+  padding: 6px 24px;
+  height: 38px;
+  border-radius: 6px;
+}
+
+.cancel-btn {
+  padding: 6px 24px;
+  height: 38px;
+  border-radius: 6px;
+}
+
+/* Hover Effects */
+.client-select:hover {
+  border-color: #40a9ff;
+}
+
+.submit-btn:hover:not(:disabled) {
+  background: #096dd9;
+}
+
+.cancel-btn:hover {
+  border-color: #d9d9d9;
+  color: #666;
+}
+
+/* Animation */
+.appointment-modal .ant-modal-content {
+  transform: translateY(0);
+  transition: transform 0.3s ease-out;
+}
+
+.appointment-modal.ant-modal-enter .ant-modal-content {
+  transform: translateY(20px);
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+  .appointment-modal {
+    max-width: 95vw !important;
+  }
+  
+  .date-display {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .therapist-details {
+    flex-direction: column;
+  }
+}

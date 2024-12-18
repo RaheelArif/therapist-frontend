@@ -5,8 +5,9 @@ import parse from "date-fns/parse";
 import startOfWeek from "date-fns/startOfWeek";
 import getDay from "date-fns/getDay";
 import "react-big-calendar/lib/css/react-big-calendar.css";
-import { Card, Select, Modal, Button, Typography, message } from "antd";
 
+import { Card, Select, Modal, Button, Typography, message ,  Tag, Avatar } from "antd";
+import { CalendarOutlined, ClockCircleOutlined, UserOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import AppointmentModal from "./components/AppointmentModal";
 
 const { Text } = Typography;
@@ -140,44 +141,77 @@ const AppointmentsPage = () => {
 
   const handleSelectEvent = (event) => {
     if (event.type === "available") {
-      // When clicking an available slot
       setSelectedSlot({
         start: event.start,
         end: event.end,
       });
       setShowNewAppointmentDialog(true);
     } else if (event.type === "appointment") {
-      // Show existing appointment details
       Modal.info({
-        title: "Appointment Details",
+        title: null, // Remove default title
+        icon: null,  // Remove default icon
+        className: 'appointment-details-modal',
         content: (
-          <div className="space-y-4">
-            <div>
-              <Text strong>Client:</Text>
-              <Text> {event.title}</Text>
+          <div className="appointment-details-content">
+            {/* Header Section */}
+            <div className="appointment-header">
+              <CalendarOutlined className="header-icon" />
+              <h2>Appointment Details</h2>
             </div>
-            <div>
-              <Text strong>Date:</Text>
-              <Text> {format(event.start, "PPP")}</Text>
+  
+            {/* Status Badge */}
+            <div className="status-section">
+              <Tag color={event.status === "SCHEDULED" ? "processing" : "success"}>
+                {event.status}
+              </Tag>
             </div>
-            <div>
-              <Text strong>Time:</Text>
-              <Text>
-                {" "}
-                {format(event.start, "p")} - {format(event.end, "p")}
-              </Text>
-            </div>
-            <div>
-              <Text strong>Status:</Text>
-              <Text> {event.status}</Text>
-            </div>
-            <div>
-              <Text strong>Therapist:</Text>
-              <Text> {selectedTherapist.user.fullname}</Text>
-            </div>
+  
+            {/* Main Content Card */}
+            <Card className="appointment-card">
+              {/* Date and Time Section */}
+              <div className="info-section date-time">
+                <CalendarOutlined className="section-icon" />
+                <div>
+                  <h4>Date & Time</h4>
+                  <p>{format(event.start, "PPPP")}</p>
+                  <p className="time">
+                    <ClockCircleOutlined /> {format(event.start, "h:mm a")} - {format(event.end, "h:mm a")}
+                  </p>
+                </div>
+              </div>
+  
+              {/* Client Section */}
+              <div className="info-section client">
+                <Avatar size={40} icon={<UserOutlined />} className="client-avatar" />
+                <div>
+                  <h4>Client</h4>
+                  <p>{event.title}</p>
+                </div>
+              </div>
+  
+              {/* Therapist Section */}
+              <div className="info-section therapist">
+                <Avatar 
+                  size={40} 
+                  src={selectedTherapist.profilePicture}
+                  icon={!selectedTherapist.profilePicture && <UserOutlined />}
+                  className="therapist-avatar"
+                />
+                <div>
+                  <h4>Therapist</h4>
+                  <p>{selectedTherapist.user.fullname}</p>
+                  <Tag color="blue">{selectedTherapist.specializations.type}</Tag>
+                </div>
+              </div>
+            </Card>
           </div>
         ),
-        width: 500,
+        width: 480,
+        centered: true,
+        okText: "Close",
+        okButtonProps: {
+          className: 'modal-ok-button'
+        }
       });
     }
   };
@@ -254,21 +288,7 @@ const AppointmentsPage = () => {
     },
   ];
 
-  const eventStyleGetter = (event) => {
-    let style = {
-      backgroundColor: "#1890ff", // antd primary blue for appointments
-    };
 
-    if (event.type === "available") {
-      style.backgroundColor = "#52c41a"; // antd success green for available slots
-    }
-
-    if (event.status === "CANCELLED") {
-      style.backgroundColor = "#f5222d"; // antd error red for cancelled
-    }
-
-    return { style };
-  };
   const handleSelectSlot = (slotInfo) => {
     const selectedDate = new Date(slotInfo.start);
     const dayNames = [
@@ -337,6 +357,43 @@ const AppointmentsPage = () => {
       </div>
     ),
   };
+  const eventStyleGetter = (event) => {
+    let className = '';
+    let style = {
+      borderRadius: '6px',
+      padding: '4px 8px',
+      fontSize: '0.9em',
+      border: 'none', // Removed borders for cleaner look
+      fontWeight: '500',
+    };
+  
+    if (event.type === "available") {
+      className = 'available-slot';
+      style.backgroundColor = '#52c41a'; // Solid green
+      style.color = 'white';
+      style.opacity = 0.9;
+    } else if (event.type === "appointment") {
+      className = 'booked-slot';
+      style.backgroundColor = '#1890ff'; // Solid blue
+      style.color = 'white';
+      style.opacity = 0.9;
+    }
+  
+    if (event.status === "CANCELLED") {
+      style.backgroundColor = '#ff4d4f'; // Solid red
+      style.color = 'white';
+      style.opacity = 0.9;
+    }
+  
+    // Add hover effect through CSS
+    style.cursor = 'pointer';
+    style.transition = 'all 0.2s ease';
+  
+    return { 
+      style,
+      className: `calendar-event ${className}`
+    };
+  };
   return (
     <div className="p-6">
       <Card title="Appointments Management">
@@ -348,7 +405,6 @@ const AppointmentsPage = () => {
             Click on any green "Available" slot to create an appointment
           </Text>
         </div>
-
         <Calendar
           localizer={localizer}
           events={[
@@ -376,19 +432,6 @@ const AppointmentsPage = () => {
           timeslots={4}
           selectable={true}
           longPressThreshold={10}
-          tooltipAccessor={(event) => {
-            if (event.type === "available") {
-              return `Click to schedule (${format(
-                event.start,
-                "h:mm a"
-              )} - ${format(event.end, "h:mm a")})`;
-            }
-            return `${event.title}: ${format(event.start, "h:mm a")} - ${format(
-              event.end,
-              "h:mm a"
-            )}`;
-          }}
-          components={customComponents}
           formats={{
             timeGutterFormat: (date, culture, localizer) =>
               localizer.format(date, "h:mm a", culture),
@@ -405,11 +448,25 @@ const AppointmentsPage = () => {
                 culture
               )} - ${localizer.format(end, "h:mm a", culture)}`,
           }}
-          dayPropGetter={(date) => ({
-            style: {
-              cursor: "pointer",
-            },
-          })}
+          components={{
+            timeSlotWrapper: ({ children, value }) => (
+              <div title={format(value, "h:mm a")} className="custom-time-slot">
+                {children}
+              </div>
+            ),
+            eventWrapper: ({ children, event }) => (
+              <div
+                title={`${event.title} (${format(
+                  event.start,
+                  "h:mm a"
+                )} - ${format(event.end, "h:mm a")})`}
+                className="custom-event-wrapper"
+              >
+                {children}
+              </div>
+            ),
+          }}
+          dayLayoutAlgorithm="no-overlap"
         />
       </Card>
 
