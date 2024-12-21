@@ -1,20 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { Card, Row, Col, Statistic, Spin } from 'antd';
-import { 
-  TeamOutlined, 
-  UserOutlined, 
-  MedicineBoxOutlined
+import {
+  TeamOutlined,
+  UserOutlined,
+  MedicineBoxOutlined,
+  UsergroupAddOutlined
 } from '@ant-design/icons';
-import { getClients } from '../../../../api/client';
-import { getTherapists } from '../../../../api/therapist';
-import { getAdmins } from '../../../../api/admin';
+import { getAllUsers } from '../../../../api/admin';
 
 const DashboardPage = () => {
   const [loading, setLoading] = useState(true);
   const [counts, setCounts] = useState({
     admins: 0,
     therapists: 0,
-    clients: 0
+    clients: 0,
+    totalUsers: 0
   });
 
   useEffect(() => {
@@ -24,16 +24,16 @@ const DashboardPage = () => {
   const fetchCounts = async () => {
     try {
       setLoading(true);
-      const [clients, therapists, admins] = await Promise.all([
-        getClients(),
-        getTherapists(),
-        getAdmins()
-      ]);
+      const [adminsData, allUsersData] = await Promise.all([
 
+        getAllUsers()
+      ]);
+      
       setCounts({
-        admins: admins?.length || 0,
-        therapists: therapists?.length || 0,
-        clients: clients?.length || 0
+        admins: adminsData.length || 0,
+        therapists: allUsersData.filter(user => user.role === 'therapist').length || 0,
+        clients: allUsersData.filter(user => user.role === 'client').length || 0,
+        totalUsers: allUsersData.length || 0
       });
     } catch (error) {
       console.error('Error fetching counts:', error);
@@ -63,6 +63,13 @@ const DashboardPage = () => {
       icon: <UserOutlined style={{ fontSize: 24, color: '#722ed1' }} />,
       color: '#f9f0ff',
       valueStyle: { color: '#722ed1' }
+    },
+    {
+      title: 'Total Users',
+      value: counts.totalUsers,
+      icon: <UsergroupAddOutlined style={{ fontSize: 24, color: '#fa8c16' }} />,
+      color: '#fff7e6',
+      valueStyle: { color: '#fa8c16' }
     }
   ];
 
@@ -72,11 +79,11 @@ const DashboardPage = () => {
       <Spin spinning={loading}>
         <Row gutter={[24, 24]}>
           {cards.map((card, index) => (
-            <Col key={index} xs={24} sm={12} lg={8}>
+            <Col key={index} xs={24} sm={12} lg={6}>
               <Card
                 hoverable
                 className="h-full"
-                style={{ 
+                style={{
                   backgroundColor: card.color,
                   borderRadius: '12px',
                   border: '1px solid #f0f0f0'
@@ -86,7 +93,7 @@ const DashboardPage = () => {
                   <div className="p-3 rounded-full" style={{ backgroundColor: 'white' }}>
                     {card.icon}
                   </div>
-                  <Statistic 
+                  <Statistic
                     value={card.value}
                     valueStyle={card.valueStyle}
                     prefix={null}

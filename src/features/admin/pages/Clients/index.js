@@ -1,39 +1,85 @@
 import React, { useEffect, useState } from "react";
-import { Table, Button, Space, Modal, message } from "antd";
+import { Table, Button, Space, Modal, message, Popconfirm } from "antd";
 import { EditOutlined, DeleteOutlined, PlusOutlined } from "@ant-design/icons";
+import { useDispatch, useSelector } from 'react-redux';
 import ClientForm from "./components/ClientForm";
-import { getClients, createClient } from "../../../../api/client";
+import {
+  fetchClients,
+  addNewClient,
+  editClient,
+  removeClient,
+  selectClients,
+  selectClientStatus,
+  selectClientPagination,
+  selectClientError
+} from '../../../../store/client/clientSlice';
 
 const ClientsPage = () => {
-  const [clients, setClients] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
+  const clients = useSelector(selectClients);
+  const status = useSelector(selectClientStatus);
+  const pagination = useSelector(selectClientPagination);
+  const error = useSelector(selectClientError);
   const [modalVisible, setModalVisible] = useState(false);
+  const [editingClient, setEditingClient] = useState(null);
 
   useEffect(() => {
-    fetchClients();
-  }, []);
-
-  const fetchClients = async () => {
-    try {
-      const data = await getClients();
-      setClients(data);
-    } catch (error) {
-      message.error("Failed to fetch clients");
+    if (status === 'idle') {
+      dispatch(fetchClients({ page: 1, pageSize: 10 }));
     }
+  }, [status, dispatch]);
+
+  useEffect(() => {
+    if (error) {
+      message.error(error);
+    }
+  }, [error]);
+
+  const handleTableChange = (newPagination) => {
+    dispatch(fetchClients({
+      page: newPagination.current,
+      pageSize: newPagination.pageSize
+    }));
   };
 
   const handleAddClient = async (values) => {
     try {
-      setLoading(true);
-      await createClient(values);
+      await dispatch(addNewClient(values)).unwrap();
       message.success("Client created successfully");
       setModalVisible(false);
-      fetchClients();
-    } catch (error) {
+    } catch (err) {
       message.error("Failed to create client");
-    } finally {
-      setLoading(false);
     }
+  };
+
+  const handleEdit = (record) => {
+    setEditingClient(record);
+    setModalVisible(true);
+  };
+
+  const handleEditSubmit = async (values) => {
+    try {
+      await dispatch(editClient({ id: editingClient.id, data: values })).unwrap();
+      message.success("Client updated successfully");
+      setModalVisible(false);
+      setEditingClient(null);
+    } catch (err) {
+      message.error("Failed to update client");
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await dispatch(removeClient(id)).unwrap();
+      message.success("Client deleted successfully");
+    } catch (err) {
+      message.error("Failed to delete client");
+    }
+  };
+
+  const handleModalCancel = () => {
+    setModalVisible(false);
+    setEditingClient(null);
   };
 
   const columns = [
@@ -60,28 +106,28 @@ const ClientsPage = () => {
         <Space>
           <Button
             icon={<EditOutlined />}
-            // onClick={() => handleEdit(record.id)}
+            onClick={() => handleEdit(record)}
           />
-          <Button
-            danger
-            icon={<DeleteOutlined />}
-            // onClick={() => handleDelete(record.id)}
-          />
+          <Popconfirm
+            title="Are you sure you want to delete this client?"
+            onConfirm={() => handleDelete(record.id)}
+            okText="Yes"
+            cancelText="No"
+          >
+            <Button
+              danger
+              icon={<DeleteOutlined />}
+            />
+          </Popconfirm>
         </Space>
       ),
     },
   ];
 
   return (
-    <div>
-      <div
-        style={{
-          marginBottom: 16,
-          display: "flex",
-          justifyContent: "space-between",
-        }}
-      >
-        <h2>Clients Management</h2>
+    <div className="p-6">
+      <div className="mb-6 flex justify-between items-center">
+        <h2  onClick={() => console.log(clients)} className="text-2xl font-semibold">Clients Management</h2>
         <Button
           type="primary"
           icon={<PlusOutlined />}
@@ -95,18 +141,29 @@ const ClientsPage = () => {
         columns={columns}
         dataSource={clients}
         rowKey="id"
-        pagination={{ pageSize: 10 }}
-        loading={loading}
+        pagination={{
+          ...pagination,
+          showSizeChanger: false,
+         
+          defaultPageSize: 10,
+          
+        }}
+        loading={status === 'loading'}
+        onChange={handleTableChange}
       />
 
       <Modal
-        title="Add New Client"
+        title={editingClient ? "Edit Client" : "Add New Client"}
         open={modalVisible}
-        onCancel={() => setModalVisible(false)}
+        onCancel={handleModalCancel}
         footer={null}
         width={800}
       >
-        <ClientForm onFinish={handleAddClient} loading={loading} />
+        <ClientForm 
+          onFinish={editingClient ? handleEditSubmit : handleAddClient}
+          initialValues={editingClient}
+          loading={status === 'loading'}
+        />
       </Modal>
     </div>
   );
