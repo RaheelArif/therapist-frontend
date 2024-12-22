@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Table, Button, Space, Modal, message, Popconfirm } from "antd";
 import { EditOutlined, DeleteOutlined, PlusOutlined } from "@ant-design/icons";
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from "react-redux";
 import ClientForm from "./components/ClientForm";
 import {
   fetchClients,
@@ -11,8 +11,8 @@ import {
   selectClients,
   selectClientStatus,
   selectClientPagination,
-  selectClientError
-} from '../../../../store/client/clientSlice';
+  selectClientError,
+} from "../../../../store/client/clientSlice";
 
 const ClientsPage = () => {
   const dispatch = useDispatch();
@@ -24,7 +24,7 @@ const ClientsPage = () => {
   const [editingClient, setEditingClient] = useState(null);
 
   useEffect(() => {
-    if (status === 'idle') {
+    if (status === "idle") {
       dispatch(fetchClients({ page: 1, pageSize: 10 }));
     }
   }, [status, dispatch]);
@@ -36,10 +36,12 @@ const ClientsPage = () => {
   }, [error]);
 
   const handleTableChange = (newPagination) => {
-    dispatch(fetchClients({
-      page: newPagination.current,
-      pageSize: newPagination.pageSize
-    }));
+    dispatch(
+      fetchClients({
+        page: newPagination.current,
+        pageSize: newPagination.pageSize,
+      })
+    );
   };
 
   const handleAddClient = async (values) => {
@@ -59,7 +61,9 @@ const ClientsPage = () => {
 
   const handleEditSubmit = async (values) => {
     try {
-      await dispatch(editClient({ id: editingClient.id, data: values })).unwrap();
+      await dispatch(
+        editClient({ id: editingClient.id, data: values })
+      ).unwrap();
       message.success("Client updated successfully");
       setModalVisible(false);
       setEditingClient(null);
@@ -99,25 +103,20 @@ const ClientsPage = () => {
       key: "createdAt",
       render: (date) => new Date(date).toLocaleDateString(),
     },
+
     {
       title: "Actions",
       key: "actions",
       render: (_, record) => (
         <Space>
-          <Button
-            icon={<EditOutlined />}
-            onClick={() => handleEdit(record)}
-          />
+          <Button icon={<EditOutlined />} onClick={() => handleEdit(record)} />
           <Popconfirm
             title="Are you sure you want to delete this client?"
             onConfirm={() => handleDelete(record.id)}
             okText="Yes"
             cancelText="No"
           >
-            <Button
-              danger
-              icon={<DeleteOutlined />}
-            />
+            <Button danger icon={<DeleteOutlined />} />
           </Popconfirm>
         </Space>
       ),
@@ -127,7 +126,12 @@ const ClientsPage = () => {
   return (
     <div className="p-6">
       <div className="mb-6 flex justify-between items-center">
-        <h2  onClick={() => console.log(clients)} className="text-2xl font-semibold">Clients Management</h2>
+        <h2
+          onClick={() => console.log(clients)}
+          className="text-2xl font-semibold"
+        >
+          Clients Management
+        </h2>
         <Button
           type="primary"
           icon={<PlusOutlined />}
@@ -144,11 +148,10 @@ const ClientsPage = () => {
         pagination={{
           ...pagination,
           showSizeChanger: false,
-         
+
           defaultPageSize: 10,
-          
         }}
-        loading={status === 'loading'}
+        loading={status === "loading"}
         onChange={handleTableChange}
       />
 
@@ -159,10 +162,10 @@ const ClientsPage = () => {
         footer={null}
         width={800}
       >
-        <ClientForm 
+        <ClientForm
           onFinish={editingClient ? handleEditSubmit : handleAddClient}
           initialValues={editingClient}
-          loading={status === 'loading'}
+          loading={status === "loading"}
         />
       </Modal>
     </div>

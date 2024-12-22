@@ -194,7 +194,29 @@
   .rbc-off-range-bg {
     background: #fafafa;
   }
+  .client-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .ant-spin-text {
+    margin-top: 8px;
+    color: #1890ff;
+    font-size: 14px;
+  }
   
+  .anticon.anticon-loading {
+    color: #1890ff;
+  }
+  .client-icon {
+    color: #8c8c8c;
+  }
+  
+  .client-email {
+    color: #8c8c8c;
+    margin-left: auto;
+    font-size: 0.9em;
+  }
   /* Selected Cell */
   .rbc-selected-cell {
     background-color: rgba(24, 144, 255, 0.1);

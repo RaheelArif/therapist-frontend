@@ -5,7 +5,7 @@ import ClientsPage from './pages/Clients';
 import TherapistsPage from './pages/Therapists';
 import DashboardPage from './pages/Dashboard';
 import AdminsPage from './pages/Admins';
-import AppointmentsPage from './pages/Appointments';
+import AddAppointmentPage from './pages/AddAppointments';
 
 export const AdminRoutes = () => (
   <AdminLayout>
@@ -14,7 +14,8 @@ export const AdminRoutes = () => (
       <Route path="/clients" element={<ClientsPage />} />
       <Route path="/therapists" element={<TherapistsPage />} />
       <Route path="/admins" element={<AdminsPage />} />
-      <Route path="/appointments" element={<AppointmentsPage />} />
+      <Route path="/add-appointment" element={<AddAppointmentPage />} /> 
+      {/* <Route path="/appointments" element={<AppointmentsPage />} /> */}
     </Routes>
   </AdminLayout>
 );

@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { Table, Button, Space, Modal, message, Popconfirm } from 'antd';
-import { EditOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
-import { useDispatch, useSelector } from 'react-redux';
-import TherapistForm from './components/TherapistForm';
+import React, { useEffect, useState } from "react";
+import { Table, Button, Space, Modal, message, Popconfirm } from "antd";
+import { EditOutlined, DeleteOutlined, PlusOutlined  ,  CalendarOutlined } from "@ant-design/icons";
+import { useDispatch, useSelector } from "react-redux";
+import TherapistForm from "./components/TherapistForm";
 import {
   fetchTherapists,
   addNewTherapist,
@@ -10,11 +10,15 @@ import {
   selectTherapists,
   selectTherapistStatus,
   selectTherapistPagination,
-  selectTherapistError
-} from '../../../../store/therapist/therapistSlice';
+  selectTherapistError,
+} from "../../../../store/therapist/therapistSlice";
+import { resetAppointmentState } from '../../../../store/appointment/appointmentSlice';
+
+import { useNavigate } from "react-router-dom";
 
 const TherapistsPage = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const therapists = useSelector(selectTherapists);
   const status = useSelector(selectTherapistStatus);
   const pagination = useSelector(selectTherapistPagination);
@@ -33,29 +37,40 @@ const TherapistsPage = () => {
     }
   }, [error]);
 
+  const handleSetAppointment = async (therapist) => {
+    try {
+      await dispatch(resetAppointmentState(therapist)).unwrap();
+      navigate('/admin/add-appointment');
+    } catch (err) {
+      message.error("Failed to initialize appointment page");
+    }
+  };
+
   const handleTableChange = (newPagination) => {
-    dispatch(fetchTherapists({
-      page: newPagination.current,
-      pageSize: newPagination.pageSize
-    }));
+    dispatch(
+      fetchTherapists({
+        page: newPagination.current,
+        pageSize: newPagination.pageSize,
+      })
+    );
   };
 
   const handleAddTherapist = async (values) => {
     try {
       await dispatch(addNewTherapist(values)).unwrap();
-      message.success('Therapist created successfully');
+      message.success("Therapist created successfully");
       setModalVisible(false);
     } catch (err) {
-      message.error('Failed to create therapist');
+      message.error("Failed to create therapist");
     }
   };
 
   const handleDelete = async (id) => {
     try {
       await dispatch(removeTherapist(id)).unwrap();
-      message.success('Therapist deleted successfully');
+      message.success("Therapist deleted successfully");
     } catch (err) {
-      message.error('Failed to delete therapist');
+      message.error("Failed to delete therapist");
     }
   };
 
@@ -92,11 +107,19 @@ const TherapistsPage = () => {
               icon={<DeleteOutlined />}
             />
           </Popconfirm>
+          <Button
+            type="primary"
+            icon={<CalendarOutlined />}
+            onClick={() => handleSetAppointment(record)}
+          >
+            Set Appointment
+          </Button>
         </Space>
       ),
-    },
+    }
   ];
 
+ 
   return (
     <div className="p-6">
       <div className="mb-6 flex justify-between items-center">
@@ -117,12 +140,12 @@ const TherapistsPage = () => {
         pagination={{
           ...pagination,
           showSizeChanger: true,
-          pageSizeOptions: ['10', '20', '50'],
+          pageSizeOptions: ["10", "20", "50"],
           defaultPageSize: 10,
-          showTotal: (total, range) => 
+          showTotal: (total, range) =>
             `${range[0]}-${range[1]} of ${total} items`,
         }}
-        loading={status === 'loading'}
+        loading={status === "loading"}
         onChange={handleTableChange}
       />
 
@@ -133,9 +156,9 @@ const TherapistsPage = () => {
         footer={null}
         width={800}
       >
-        <TherapistForm 
+        <TherapistForm
           onFinish={handleAddTherapist}
-          loading={status === 'loading'}
+          loading={status === "loading"}
         />
       </Modal>
     </div>

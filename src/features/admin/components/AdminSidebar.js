@@ -1,6 +1,6 @@
 import React from "react";
 import { Layout, Menu } from "antd";
-import { UserOutlined, TeamOutlined } from "@ant-design/icons";
+import { UserOutlined, TeamOutlined, CalendarOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import logo from "../../../assets/images/logo-ms.png";
 
@@ -24,6 +24,11 @@ const AdminSidebar = () => {
       key: "/admin/admins",
       icon: <TeamOutlined />,
       label: "Admins",
+    },
+    {
+      key: "/admin/appointments",
+      icon: <CalendarOutlined />,
+      label: "Appointments",
     },
     {
       key: "/admin/appointments",
