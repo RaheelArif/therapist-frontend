@@ -31,9 +31,9 @@ const AdminSidebar = () => {
       label: "Appointments",
     },
     {
-      key: "/admin/appointments",
+      key: "/admin/add-appointment",
       icon: <TeamOutlined />,
-      label: "Appointments",
+      label: "Add Appointment",
     },
   ];
 

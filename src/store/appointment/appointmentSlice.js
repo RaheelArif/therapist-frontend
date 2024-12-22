@@ -1,19 +1,20 @@
-// store/appointment/appointmentSlice.js
+// File 1: store/appointment/appointmentSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from '../../utils/axios';
 
-// First, define the initial state
 const initialState = {
   appointments: [],
   selectedTherapist: null,
   status: 'idle', // 'idle' | 'loading' | 'succeeded' | 'failed'
-  error: null
+  error: null,
+  pagination: {
+    current: 1,
+    pageSize: 10,
+    total: 0
+  }
 };
 
-// Then define the selectors
-
-
-// Then define the async thunks
+// Async Thunks
 export const resetAppointmentState = createAsyncThunk(
   'appointment/resetState',
   async (therapist) => {
@@ -23,11 +24,34 @@ export const resetAppointmentState = createAsyncThunk(
 
 export const fetchAppointments = createAsyncThunk(
   'appointment/fetchAppointments',
-  async ({ therapistId }) => {
+  async (params) => {
+    // If therapistId is provided, we're in calendar view
+    if (params.therapistId) {
+      const response = await axios.get('/appointments', {
+        params: { therapistId: params.therapistId }
+      });
+      return {
+        data: response.data,
+        isCalendarView: true
+      };
+    }
+    
+    // Otherwise, we're in list view with pagination
+    const { page = 1, pageSize = 10, search = '', status = '' } = params;
     const response = await axios.get('/appointments', {
-      params: { therapistId }
+      params: {
+        page,
+        limit: pageSize,
+        ...(search && { search }),
+        ...(status && { status })
+      }
     });
-    return response.data;
+    return {
+      data: response.data.data,
+      total: response.data.totalRecords,
+      page: response.data.page,
+      isCalendarView: false
+    };
   }
 );
 
@@ -55,7 +79,6 @@ export const deleteAppointment = createAsyncThunk(
   }
 );
 
-// Finally, create the slice
 const appointmentSlice = createSlice({
   name: 'appointment',
   initialState,
@@ -65,6 +88,11 @@ const appointmentSlice = createSlice({
       state.appointments = [];
       state.status = 'idle';
       state.error = null;
+      state.pagination = {
+        current: 1,
+        pageSize: 10,
+        total: 0
+      };
     }
   },
   extraReducers(builder) {
@@ -86,7 +114,18 @@ const appointmentSlice = createSlice({
       })
       .addCase(fetchAppointments.fulfilled, (state, action) => {
         state.status = 'succeeded';
-        state.appointments = action.payload;
+        if (action.payload.isCalendarView) {
+          // For calendar view
+          state.appointments = action.payload.data;
+        } else {
+          // For list view
+          state.appointments = action.payload.data;
+          state.pagination = {
+            ...state.pagination,
+            current: Number(action.payload.page),
+            total: Number(action.payload.total)
+          };
+        }
       })
       .addCase(fetchAppointments.rejected, (state, action) => {
         state.status = 'failed';
@@ -139,11 +178,15 @@ const appointmentSlice = createSlice({
   }
 });
 
-// Export the actions
-export const { clearSelectedTherapist } = appointmentSlice.actions;
+// Selectors
 export const selectAppointments = (state) => state.appointment.appointments;
 export const selectSelectedTherapist = (state) => state.appointment.selectedTherapist;
 export const selectAppointmentStatus = (state) => state.appointment.status;
 export const selectAppointmentError = (state) => state.appointment.error;
-// Export the reducer
+export const selectAppointmentPagination = (state) => state.appointment.pagination;
+
+// Actions
+export const { clearSelectedTherapist } = appointmentSlice.actions;
+
+// Reducer
 export default appointmentSlice.reducer;
