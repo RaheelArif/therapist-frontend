@@ -1,0 +1,8 @@
+.darshboard-cards-c{
+    display: flex  ;
+    align-items: center;
+}
+.darshboard-cards-c svg{
+    margin-right: 10px;
+    font-size: 30px;
+}

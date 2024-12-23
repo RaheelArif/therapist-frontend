@@ -16,3 +16,7 @@ export const getAdmins = async () => {
     const response = await axios.get('/admin/get-all-user');
     return response.data;
   };
+  export const getUserCounts = async () => {
+    const response = await axios.get('/admin/count-by-role');
+    return response.data;
+  };
