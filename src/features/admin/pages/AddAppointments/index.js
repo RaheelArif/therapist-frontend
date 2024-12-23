@@ -35,6 +35,7 @@ import {
   selectAppointmentError,
 } from "../../../../store/appointment/appointmentSlice";
 import { useNavigate } from "react-router-dom";
+import AppointmentDetailsModal from "./components/AppointmentDetailsModal";
 
 const { Text } = Typography;
 const { Option } = Select;
@@ -65,7 +66,8 @@ const AppointmentsPage = () => {
     useState(false);
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [selectedClient, setSelectedClient] = useState(null);
-
+  const [showAppointmentDetails, setShowAppointmentDetails] = useState(false);
+  const [selectedAppointment, setSelectedAppointment] = useState(null);
   useEffect(() => {
     const initializeAppointments = async () => {
       if (selectedTherapist && status === "idle") {
@@ -86,19 +88,22 @@ const AppointmentsPage = () => {
 
   const handleCreateAppointment = async (appointmentData) => {
     if (!selectedClient || !appointmentData) return;
-
+  
     try {
       const newAppointment = {
         clientId: selectedClient.id,
         therapistId: selectedTherapist.id,
         startTime: appointmentData.start.toISOString(),
         endTime: appointmentData.end.toISOString(),
-        notes: "Initial appointment",
+        notes: appointmentData.notes // Use notes from form data
       };
-
+  
       await dispatch(addAppointment(newAppointment)).unwrap();
       message.success("Appointment created successfully");
+      // Reset values
       setShowNewAppointmentDialog(false);
+      setSelectedClient(null);
+      setSelectedSlot(null);
     } catch (error) {
       message.error("Failed to create appointment");
     }
@@ -150,7 +155,6 @@ const AppointmentsPage = () => {
     }
     return slots;
   };
-
   const handleSelectEvent = (event) => {
     if (event.type === "available") {
       setSelectedSlot({
@@ -159,81 +163,8 @@ const AppointmentsPage = () => {
       });
       setShowNewAppointmentDialog(true);
     } else if (event.type === "appointment") {
-      Modal.info({
-        title: null, // Remove default title
-        icon: null, // Remove default icon
-        className: "appointment-details-modal",
-        content: (
-          <div className="appointment-details-content">
-            {/* Header Section */}
-            <div className="appointment-header">
-              <CalendarOutlined className="header-icon" />
-              <h2>Appointment Details</h2>
-            </div>
-
-            {/* Status Badge */}
-            <div className="status-section">
-              <Tag
-                color={event.status === "SCHEDULED" ? "processing" : "success"}
-              >
-                {event.status}
-              </Tag>
-            </div>
-
-            {/* Main Content Card */}
-            <Card className="appointment-card">
-              {/* Date and Time Section */}
-              <div className="info-section date-time">
-                <CalendarOutlined className="section-icon" />
-                <div>
-                  <h4>Date & Time</h4>
-                  <p>{format(event.start, "PPPP")}</p>
-                  <p className="time">
-                    <ClockCircleOutlined /> {format(event.start, "h:mm a")} -{" "}
-                    {format(event.end, "h:mm a")}
-                  </p>
-                </div>
-              </div>
-
-              {/* Client Section */}
-              <div className="info-section client">
-                <Avatar
-                  size={40}
-                  icon={<UserOutlined />}
-                  className="client-avatar"
-                />
-                <div>
-                  <h4>Client</h4>
-                  <p>{event.title}</p>
-                </div>
-              </div>
-
-              {/* Therapist Section */}
-              <div className="info-section therapist">
-                <Avatar
-                  size={40}
-                  src={selectedTherapist.profilePicture}
-                  icon={!selectedTherapist.profilePicture && <UserOutlined />}
-                  className="therapist-avatar"
-                />
-                <div>
-                  <h4>Therapist</h4>
-                  <p>{selectedTherapist.user.fullname}</p>
-                  <Tag color="blue">
-                    {selectedTherapist.specializations.type}
-                  </Tag>
-                </div>
-              </div>
-            </Card>
-          </div>
-        ),
-        width: 480,
-        centered: true,
-        okText: "Close",
-        okButtonProps: {
-          className: "modal-ok-button",
-        },
-      });
+      setShowAppointmentDetails(true);
+      setSelectedAppointment(event);
     }
   };
 
@@ -389,6 +320,7 @@ const AppointmentsPage = () => {
               end: new Date(apt.endTime),
               status: apt.status,
               type: "appointment",
+              notes:apt.notes,
             })) || []),
             ...generateAvailableSlots(),
           ]}
@@ -455,6 +387,17 @@ const AppointmentsPage = () => {
           loading={status === "loading"}
         />
       ) : null}
+      {selectedAppointment && (
+        <AppointmentDetailsModal
+          open={showAppointmentDetails}
+          onClose={() => {
+            setShowAppointmentDetails(false);
+            setSelectedAppointment(null);
+          }}
+          appointment={selectedAppointment}
+          therapist={selectedTherapist}
+        />
+      )}
     </div>
   );
 };

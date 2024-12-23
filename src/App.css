@@ -15,10 +15,6 @@
 
 /* AppointmentModal.css */
 
-.appointment-modal .ant-modal-content {
-  border-radius: 12px;
-  overflow: hidden;
-}
 
 .appointment-modal .ant-modal-header {
   padding: 20px 24px;
@@ -179,6 +175,173 @@
   padding: 0;
   border: none !important;
   background: 'transparent !important';
+}
+.appointment-modal .ant-modal-content {
+  padding: 0;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.modal-content {
+  padding: 24px;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.modal-header h2 {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  color: #666;
+}
+
+.close-button:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.appointment-date {
+  color: #666;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-tag {
+  margin: 0;
+  padding: 2px 8px;
+  font-size: 12px;
+}
+
+.time-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f0f0f0;
+  color: #666;
+}
+
+.people-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  padding: 16px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.person-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.person-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+
+.person-details {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.person-avatar {
+  width: 40px;
+  height: 40px;
+  background: #f5f5f5;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+}
+
+.person-content {
+  flex: 1;
+}
+
+.person-name {
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.specialization-tag {
+  margin: 4px 0;
+}
+
+.focus-text {
+  font-size: 12px;
+  color: #666;
+}
+
+.additional-details {
+  padding-top: 16px;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+
+.details-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.detail-item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  color: #666;
+}
+
+.detail-label {
+  font-weight: 500;
+  color: #262626;
+  margin-bottom: 4px;
+}
+
+.detail-value {
+  font-size: 14px;
+}
+.notes-section {
+  padding: 16px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.notes-content {
+  background: #f9f9f9;
+  border-radius: 6px;
+  padding: 12px;
+  margin-top: 12px;
+  color: #595959;
+  font-size: 14px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  max-height: 150px;
+  overflow-y: auto;
 }
 /* Responsive */
 @media (max-width: 576px) {

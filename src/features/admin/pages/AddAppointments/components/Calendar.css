@@ -221,7 +221,141 @@
   .rbc-selected-cell {
     background-color: rgba(24, 144, 255, 0.1);
   }
+  .appointment-modal .ant-modal-content {
+    padding: 0;
+    border-radius: 8px;
+    overflow: hidden;
+  }
   
+  .appointment-modal .ant-modal-close {
+    top: 16px;
+    right: 16px;
+  }
+  
+  .appointment-content {
+    background: #fff;
+  }
+  
+  .appointment-header {
+    padding: 24px 24px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+  
+  .appointment-title {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0;
+    line-height: 1.4;
+  }
+  
+  .appointment-date {
+    color: #666;
+    margin: 4px 0 0;
+    font-size: 14px;
+  }
+  
+  .appointment-status {
+    margin-top: 4px;
+    padding: 2px 12px;
+    font-size: 13px;
+  }
+  
+  .appointment-divider {
+    margin: 0;
+    border-color: #f0f0f0;
+  }
+  
+  .appointment-section {
+    padding: 16px 24px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+    font-weight: 500;
+    margin-bottom: 16px;
+  }
+  
+  .section-icon {
+    color: #8c8c8c;
+  }
+  
+  .flex-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .user-info {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .user-details {
+    flex-grow: 1;
+  }
+  
+  .user-name {
+    font-size: 15px;
+    font-weight: 500;
+    margin: 0;
+  }
+  
+  .user-email {
+    color: #666;
+    font-size: 13px;
+    margin: 4px 0 0;
+  }
+  
+  .specialization-tag {
+    margin: 6px 0;
+  }
+  
+  .focus-text {
+    color: #666;
+    font-size: 13px;
+    margin: 4px 0 0;
+  }
+  
+  .notes-content {
+    color: #595959;
+    white-space: pre-wrap;
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  
+  .details-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .detail-item {
+    display: flex;
+    gap: 12px;
+  }
+  
+  .detail-icon {
+    color: #8c8c8c;
+    margin-top: 4px;
+  }
+  
+  .detail-label {
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+  
+  .detail-value {
+    color: #595959;
+    font-size: 14px;
+  }
   /* Responsive Design */
   @media screen and (max-width: 768px) {
     .rbc-toolbar {

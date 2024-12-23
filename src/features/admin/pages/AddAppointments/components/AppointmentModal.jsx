@@ -1,15 +1,33 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Select, Button, Typography, Alert, Space, Badge, Spin } from 'antd';
-import { format } from 'date-fns';
+import { 
+  Modal, 
+  Select, 
+  Button, 
+  Typography, 
+  Space, 
+  Badge, 
+  Spin, 
+  TimePicker,
+  Input,
+  Divider,
+  Form
+} from 'antd';
+import { format, parse, setHours, setMinutes } from 'date-fns';
 import { differenceInMinutes } from 'date-fns';
-import { CalendarOutlined, UserOutlined, ClockCircleOutlined } from '@ant-design/icons';
+import { 
+  CalendarOutlined, 
+  UserOutlined, 
+  ClockCircleOutlined,
+  FileTextOutlined
+} from '@ant-design/icons';
 import { useDispatch } from 'react-redux';
 import debounce from 'lodash/debounce';
 import axios from '../../../../../utils/axios';
+import dayjs from 'dayjs';
 
 const { Text, Title } = Typography;
 const { Option } = Select;
-
+const { TextArea } = Input;
 
 const AppointmentModal = ({
   open,
@@ -19,17 +37,34 @@ const AppointmentModal = ({
   selectedClient,
   setSelectedClient,
   therapist,
-  clients,
   loading
 }) => {
+  const [form] = Form.useForm();
   const [searchText, setSearchText] = useState('');
   const [clientOptions, setClientOptions] = useState([]);
   const [searchLoading, setSearchLoading] = useState(false);
+  const [appointmentTime, setAppointmentTime] = useState({
+    start: selectedSlot?.start ? dayjs(selectedSlot.start) : null,
+    end: selectedSlot?.end ? dayjs(selectedSlot.end) : null
+  });
+
+  useEffect(() => {
+    if (selectedSlot) {
+      setAppointmentTime({
+        start: dayjs(selectedSlot.start),
+        end: dayjs(selectedSlot.end)
+      });
+      form.setFieldsValue({
+        startTime: dayjs(selectedSlot.start),
+        endTime: dayjs(selectedSlot.end)
+      });
+    }
+  }, [selectedSlot]);
+
   useEffect(() => {
     fetchClients();
   }, []);
 
-  // Debounced search function
   const debouncedSearch = debounce((value) => {
     fetchClients(value);
   }, 500);
@@ -56,10 +91,13 @@ const AppointmentModal = ({
       setSearchLoading(false);
     }
   };
-  // Calculate duration from selected slot
+
   const getDurationText = () => {
-    if (!selectedSlot) return '';
-    const minutes = differenceInMinutes(selectedSlot.end, selectedSlot.start);
+    if (!appointmentTime.start || !appointmentTime.end) return '';
+    const minutes = differenceInMinutes(
+      appointmentTime.end.toDate(),
+      appointmentTime.start.toDate()
+    );
     const hours = Math.floor(minutes / 60);
     const remainingMinutes = minutes % 60;
     
@@ -72,131 +110,201 @@ const AppointmentModal = ({
     }
   };
 
-  const handleSubmit = () => {
-    if (!selectedClient || !selectedSlot) return;
+  const handleSubmit = async () => {
+    try {
+      const values = await form.validateFields();
+      if (!selectedClient) return;
 
-    const appointmentData = {
-      start: selectedSlot.start,
-      end: selectedSlot.end
-    };
+      const appointmentData = {
+        start: values.startTime.toDate(),
+        end: values.endTime.toDate(),
+        notes: values.notes,
+        clientId: selectedClient.id,
+        therapistId: therapist.id
+      };
 
-    onSubmit(appointmentData);
+      onSubmit(appointmentData);
+      form.resetFields();
+    } catch (error) {
+      console.error('Validation failed:', error);
+    }
   };
 
-  // Get day name
-  const getDayName = () => {
-    if (!selectedSlot) return '';
-    return format(selectedSlot.start, 'EEEE');
+ 
+  const handleCancel = () => {
+    form.resetFields();
+    setSelectedClient(null);
+    onCancel();
   };
-
   return (
     <Modal
-    title={
-      <div className="modal-header">
-        <CalendarOutlined className="modal-header-icon" />
-        <span>Schedule New Appointment</span>
-      </div>
-    }
-    open={open}
-    onCancel={onCancel}
-    footer={[
-      <Button key="back" onClick={onCancel} className="cancel-btn">
-        Cancel
-      </Button>,
-      <Button
-        key="submit"
-        type="primary"
-        onClick={handleSubmit}
-        disabled={!selectedClient || !selectedSlot || loading}
-        loading={loading}
-        className="submit-btn"
-      >
-        Create Appointment
-      </Button>,
-    ]}
-    className="appointment-modal"
-    width={600}
-  >
-    <div className="appointment-modal-content">
-      {/* Time Slot Section */}
-      {selectedSlot && (
-        <div className="time-slot-section">
-          <div className="date-display">
-            <Title level={4}>{format(selectedSlot.start, "EEEE, MMMM d, yyyy")}</Title>
-            <Badge 
-              status="processing" 
-              text={getDurationText()} 
-              className="duration-badge"
-            />
-          </div>
-
-          <div className="time-display">
-            <ClockCircleOutlined />
-            <Text>
-              {format(selectedSlot.start, "h:mm a")} - {format(selectedSlot.end, "h:mm a")}
-            </Text>
-          </div>
+      title={
+        <div className="modal-header flex items-center gap-2">
+          <CalendarOutlined className="text-blue-500" />
+          <span>Schedule New Appointment</span>
         </div>
-      )}
+      }
+      open={open}
+      onCancel={handleCancel}
+      footer={[
+        <Button key="back" onClick={handleCancel}>
+          Cancel
+        </Button>,
+        <Button
+          key="submit"
+          type="primary"
+          onClick={handleSubmit}
+          disabled={!selectedClient || !selectedSlot || loading}
+          loading={loading}
+        >
+          Create Appointment
+        </Button>,
+      ]}
+      width={600}
+    >
+      <Form
+        form={form}
+        layout="vertical"
+        initialValues={{
+          startTime: appointmentTime.start,
+          endTime: appointmentTime.end
+        }}
+      >
+        {/* Date and Time Section */}
+        <div className="bg-gray-50 p-4 rounded-lg mb-4">
+          <div className="flex justify-between items-center mb-4">
+            <Title level={5} className="m-0">
+              {selectedSlot && format(selectedSlot.start, "EEEE, MMMM d, yyyy")}
+            </Title>
+            <Badge status="processing" text={getDurationText()} />
+          </div>
 
-      {/* Client Selection Section */}
-      <div className="client-section">
-          <Title level={5}>
-            <UserOutlined /> Select Client
+          <Form.Item
+            label="Appointment Time"
+            required
+            className="mb-0"
+          >
+            <Space>
+              <Form.Item
+                name="startTime"
+                noStyle
+                rules={[{ required: true, message: 'Start time is required' }]}
+              >
+                <TimePicker
+                  format="h:mm a"
+                  minuteStep={15}
+                  onChange={(time) => {
+                    setAppointmentTime(prev => ({ ...prev, start: time }));
+                    // Also update end time to be 1 hour later by default if not set
+                    if (!appointmentTime.end) {
+                      const endTime = time?.clone().add(1, 'hour');
+                      form.setFieldsValue({ endTime });
+                      setAppointmentTime(prev => ({ ...prev, end: endTime }));
+                    }
+                  }}
+                />
+              </Form.Item>
+              <span>to</span>
+              <Form.Item
+                name="endTime"
+                noStyle
+                rules={[{ required: true, message: 'End time is required' }]}
+              >
+                <TimePicker
+                  format="h:mm a"
+                  minuteStep={15}
+                  onChange={(time) => setAppointmentTime(prev => ({ ...prev, end: time }))}
+                />
+              </Form.Item>
+            </Space>
+          </Form.Item>
+        </div>
+
+        {/* Client Selection Section */}
+        <div className="mb-4">
+          <Title level={5} className="flex items-center gap-2 mb-3">
+            <UserOutlined />
+            <span>Select Client</span>
           </Title>
           <Select
             showSearch
-            className="client-select"
+            className="w-full"
             placeholder="Search for a client"
             value={selectedClient?.id}
             onChange={(value) => {
               const client = clientOptions.find(c => c.id === value);
               setSelectedClient(client);
             }}
+            style={{width:"100%" , marginBottom:"30px"}}
             onSearch={handleSearch}
             loading={searchLoading}
             filterOption={false}
             notFoundContent={searchLoading ? <Spin size="small" /> : null}
-            style={{ width: '100%' }}
           >
             {clientOptions.map((client) => (
               <Option key={client.id} value={client.id}>
-                <div className="client-option">
-                  <UserOutlined className="client-icon" />
-                  <span>{client.user.fullname}</span>
-                  <span className="client-email">{client.user.email}</span>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <UserOutlined />
+                    <span>{client.user.fullname}</span>
+                  </div>
+                  {/* <Text type="secondary" className="text-sm">
+                    {client.user.email}
+                  </Text> */}
                 </div>
               </Option>
             ))}
           </Select>
         </div>
-      
-      {/* Therapist Info Section */}
-      <div className="therapist-section">
-        <div className="therapist-header">
-          <img 
-            src={therapist?.profilePicture || 'https://via.placeholder.com/40'} 
-            alt={therapist?.user.fullname}
-            className="therapist-avatar"
+
+        {/* Notes Section */}
+        <Form.Item
+          name="notes"
+          label={
+            <div className="flex items-center gap-2">
+              <FileTextOutlined />
+              <span>Appointment Notes</span>
+            </div>
+          }
+          rules={[{ required: true, message: 'Please add appointment notes' }]}
+        >
+          <TextArea
+            rows={4}
+            placeholder="Enter details about the appointment..."
+            className="mt-2"
           />
-          <div className="therapist-info">
-            <Text strong>{therapist.user.fullname}</Text>
-            <Text type="secondary">{therapist.specializations.type}</Text>
+        </Form.Item>
+
+        <Divider />
+
+        {/* Therapist Info Section */}
+        <div className="bg-gray-50 p-4 rounded-lg">
+          <div className="flex items-center gap-4 mb-3">
+            <img 
+              src={therapist?.profilePicture || 'https://via.placeholder.com/40'} 
+              alt={therapist?.user.fullname}
+              className="w-10 h-10 rounded-full"
+            />
+            <div>
+              <Text strong className="block">{therapist.user.fullname}</Text>
+              <Text type="secondary">{therapist.specializations.type}</Text>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Text strong className="block">Focus:</Text>
+              <Text>{therapist.specializations.focus}</Text>
+            </div>
+            <div>
+              <Text strong className="block">Working Hours:</Text>
+              <Text>
+                {therapist.availableHours[format(selectedSlot?.start || new Date(), 'EEEE').toLowerCase()] || 'N/A'}
+              </Text>
+            </div>
           </div>
         </div>
-        <div className="therapist-details">
-          <div className="detail-item">
-            <Text strong>Focus:</Text>
-            <Text>{therapist.specializations.focus}</Text>
-          </div>
-          <div className="detail-item">
-            <Text strong>Working Hours:</Text>
-            <Text>{therapist.availableHours[format(selectedSlot?.start || new Date(), 'EEEE').toLowerCase()] || 'N/A'}</Text>
-          </div>
-        </div>
-      </div>
-    </div>
-  </Modal>
+      </Form>
+    </Modal>
   );
 };
 
