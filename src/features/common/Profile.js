@@ -1,25 +1,20 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   Card,
   Descriptions,
   Avatar,
   Divider,
-  Button,
-  Modal,
-  Form,
-  Input,
-  message,
 } from "antd";
-import { UserOutlined, EditOutlined } from "@ant-design/icons";
-import { useSelector, useDispatch } from "react-redux";
-
+import { UserOutlined } from "@ant-design/icons";
+import { useSelector } from "react-redux";
+import PageLoader from "../../components/shared/PageLoader";
 
 const Profile = () => {
+  const { user, isLoading } = useSelector((state) => state.auth);
 
-  const { user } = useSelector((state) => state.auth);
-
-
- 
+  if (isLoading || !user) {
+    return <PageLoader />;
+  }
 
   return (
     <div className="p-6">
@@ -32,7 +27,6 @@ const Profile = () => {
           />
           <div className="flex items-center justify-center mt-4 mb-1 gap-2">
             <h2 className="text-2xl font-bold">{user?.user?.fullname}</h2>
-            
           </div>
           <p className="text-gray-500">{user?.user?.role}</p>
         </div>
@@ -47,11 +41,8 @@ const Profile = () => {
           <Descriptions.Item label="Email">
             {user?.user?.email}
           </Descriptions.Item>
-       
         </Descriptions>
-
       </Card>
-
     </div>
   );
 };
