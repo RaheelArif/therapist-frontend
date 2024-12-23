@@ -23,37 +23,22 @@ export const resetAppointmentState = createAsyncThunk(
 );
 
 export const fetchAppointments = createAsyncThunk(
-  'appointment/fetchAppointments',
-  async (params) => {
-    // If therapistId is provided, we're in calendar view
-    if (params.therapistId) {
+    'appointment/fetchAppointments',
+    async (params) => {
+      // For calendar view (with therapistId)
       const response = await axios.get('/appointments', {
-        params: { therapistId: params.therapistId }
+        params: {
+          ...(params.therapistId && { therapistId: params.therapistId }),
+          ...(params.status && { status: params.status }),
+          ...(params.clientId && { clientId: params.clientId })
+        }
       });
       return {
         data: response.data,
-        isCalendarView: true
+        isCalendarView: !!params.therapistId
       };
     }
-    
-    // Otherwise, we're in list view with pagination
-    const { page = 1, pageSize = 10, search = '', status = '' } = params;
-    const response = await axios.get('/appointments', {
-      params: {
-        page,
-        limit: pageSize,
-        ...(search && { search }),
-        ...(status && { status })
-      }
-    });
-    return {
-      data: response.data.data,
-      total: response.data.totalRecords,
-      page: response.data.page,
-      isCalendarView: false
-    };
-  }
-);
+  );
 
 export const addAppointment = createAsyncThunk(
   'appointment/addAppointment',

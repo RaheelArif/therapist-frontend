@@ -175,7 +175,11 @@
 .appointment-modal.ant-modal-enter .ant-modal-content {
   transform: translateY(20px);
 }
-
+.ant-select-selector {
+  padding: 0;
+  border: none !important;
+  background: 'transparent !important';
+}
 /* Responsive */
 @media (max-width: 576px) {
   .appointment-modal {

@@ -12,6 +12,8 @@ export const getTherapists = async ({ fullname = '', page = 1, pageSize = 10 } =
   return response.data;
 };
 
+
+
 export const createTherapist = async (data) => {
   const response = await axios.post("/admin/create-therapist", data);
   return response.data;
