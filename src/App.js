@@ -9,6 +9,10 @@ import { useSelector } from "react-redux";
 import "./App.css";
 import AdminLayout from "./features/admin/AdminLayout";
 import InitializeApp from './components/shared/InitializeApp';
+import TherapistLayout from "./features/therapist/components/TherapistLayout";
+import TherapistDashboard from "./features/therapist/TherapistDashboard";
+
+
 const PrivateRoute = ({ children, role }) => {
   const { isAuthenticated, role: userRole } = useSelector(
     (state) => state.auth
@@ -37,6 +41,16 @@ const App = () => {
             element={
               <PrivateRoute role="Admin">
                 <AdminRoutes />
+              </PrivateRoute>
+            }
+          />
+           <Route
+            path="/therapist"
+            element={
+              <PrivateRoute role="Therapist">
+                <TherapistLayout>
+                  <TherapistDashboard />
+                </TherapistLayout>
               </PrivateRoute>
             }
           />

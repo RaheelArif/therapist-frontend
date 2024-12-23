@@ -5,7 +5,7 @@ import {
   TeamOutlined,
   CalendarOutlined,
 } from "@ant-design/icons";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import logo from "../../../assets/images/logo-ms.png";
 
@@ -14,6 +14,7 @@ const { Text } = Typography;
 
 const AdminSidebar = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useSelector((state) => state.auth);
 
   const items = [
@@ -49,11 +50,23 @@ const AdminSidebar = () => {
     },
   ];
 
+  // Function to find the selected key based on current path
+  const getSelectedKey = () => {
+    // Check if we're on the exact admin path
+    if (location.pathname === '/admin') {
+      return ['/admin'];
+    }
+    
+    // Find the menu item that matches the current path
+    const selectedItem = items.find(item => 
+      location.pathname.startsWith(item.key) && item.key !== '/admin'
+    );
+    
+    return selectedItem ? [selectedItem.key] : ['/admin'];
+  };
+
   return (
-    <Sider
-      onClick={() => console.log(user)}
-      style={{ backgroundColor: "white" }}
-    >
+    <Sider style={{ backgroundColor: "white" }}>
       <div className="logo-area-c" onClick={() => navigate("/admin")}>
         <img
           src={logo}
@@ -62,7 +75,12 @@ const AdminSidebar = () => {
         />
       </div>
 
-      <Menu mode="inline" items={items} onClick={({ key }) => navigate(key)} />
+      <Menu 
+        mode="inline" 
+        items={items} 
+        onClick={({ key }) => navigate(key)}
+        selectedKeys={getSelectedKey()}
+      />
     </Sider>
   );
 };

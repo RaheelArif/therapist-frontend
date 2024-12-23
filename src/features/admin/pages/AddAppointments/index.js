@@ -17,6 +17,7 @@ import {
   Tag,
   Avatar,
   Spin,
+  Alert,
 } from "antd";
 import {
   CalendarOutlined,
@@ -24,6 +25,7 @@ import {
   UserOutlined,
   CheckCircleOutlined,
   LoadingOutlined,
+  TeamOutlined,
 } from "@ant-design/icons";
 import AppointmentModal from "./components/AppointmentModal";
 import {
@@ -88,16 +90,16 @@ const AppointmentsPage = () => {
 
   const handleCreateAppointment = async (appointmentData) => {
     if (!selectedClient || !appointmentData) return;
-  
+
     try {
       const newAppointment = {
         clientId: selectedClient.id,
         therapistId: selectedTherapist.id,
         startTime: appointmentData.start.toISOString(),
         endTime: appointmentData.end.toISOString(),
-        notes: appointmentData.notes // Use notes from form data
+        notes: appointmentData.notes, // Use notes from form data
       };
-  
+
       await dispatch(addAppointment(newAppointment)).unwrap();
       message.success("Appointment created successfully");
       // Reset values
@@ -114,6 +116,16 @@ const AppointmentsPage = () => {
 
     const slots = [];
     const currentDate = new Date();
+
+    // Set to first day of previous month
+    const startDate = new Date(currentDate);
+    startDate.setMonth(currentDate.getMonth() - 1);
+    startDate.setDate(1);
+
+    // Set to last day of next month
+    const endDate = new Date(currentDate);
+    endDate.setMonth(currentDate.getMonth() + 2, 0);
+
     const dayNames = [
       "sunday",
       "monday",
@@ -124,11 +136,12 @@ const AppointmentsPage = () => {
       "saturday",
     ];
 
-    // Generate slots for next 30 days
-    for (let i = 0; i < 30; i++) {
-      const date = new Date(currentDate);
-      date.setDate(currentDate.getDate() + i);
-
+    // Loop through each day in the date range
+    for (
+      let date = new Date(startDate);
+      date <= endDate;
+      date.setDate(date.getDate() + 1)
+    ) {
       const dayName = dayNames[date.getDay()];
 
       if (selectedTherapist.availableHours[dayName]) {
@@ -277,6 +290,49 @@ const AppointmentsPage = () => {
   };
 
   const antIcon = <LoadingOutlined style={{ fontSize: 48 }} spin />;
+
+  if (!selectedTherapist) {
+    return (
+      <div className="p-6">
+        <Card
+          hoverable
+          className="max-w-lg mx-auto transform transition-all duration-300 hover:shadow-lg"
+          style={{
+            borderRadius: "16px",
+            border: "none",
+            overflow: "hidden",
+          }}
+          bodyStyle={{ padding: "32px" }}
+        >
+          <div className="text-center">
+            <div className="p-4 rounded-2xl bg-white shadow-sm inline-block mb-6">
+              <TeamOutlined
+                style={{
+                  fontSize: "48px",
+                  color: "#1890ff",
+                }}
+              />
+            </div>
+            <h2 className="text-2xl font-semibold mb-4 text-gray-800">
+              No Therapist Selected
+            </h2>
+            <p className="text-gray-500 mb-8">
+              To view and manage appointments, please select a therapist first
+            </p>
+            <Button
+              type="primary"
+              size="large"
+              onClick={() => navigate("/admin/therapists")}
+              className="shadow-md h-12 px-8 text-base"
+            >
+              Go to Therapists Page
+            </Button>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="p-6">
       <Card title="Appointments Management">
@@ -320,7 +376,7 @@ const AppointmentsPage = () => {
               end: new Date(apt.endTime),
               status: apt.status,
               type: "appointment",
-              notes:apt.notes,
+              notes: apt.notes,
             })) || []),
             ...generateAvailableSlots(),
           ]}
@@ -353,6 +409,12 @@ const AppointmentsPage = () => {
                 "h:mm a",
                 culture
               )} - ${localizer.format(end, "h:mm a", culture)}`,
+            // Add this format for the date range header
+            dayRangeHeaderFormat: ({ start, end }, culture, localizer) =>
+              `${localizer.format(start, "MMMM dd, yyyy")} – ${localizer.format(
+                end,
+                "dd, yyyy"
+              )}`,
           }}
           components={{
             timeSlotWrapper: ({ children, value }) => (

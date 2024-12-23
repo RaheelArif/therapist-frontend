@@ -23,3 +23,5 @@ export const deleteTherapist = async (id) => {
   const response = await axios.delete(`/admin/delete-therapist/${id}`);
   return response.data;
 };
+
+
