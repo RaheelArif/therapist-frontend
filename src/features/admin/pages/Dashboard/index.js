@@ -103,6 +103,7 @@ const DashboardPage = () => {
                       end={card.value}
                       duration={1.5}
                       separator=","
+                      enableScrollSpy={true} 
                       delay={0}
                       style={{
                         ...card.valueStyle,

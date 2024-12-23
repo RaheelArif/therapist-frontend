@@ -1,15 +1,27 @@
 import React from "react";
-import { Layout, Menu } from "antd";
-import { UserOutlined, TeamOutlined, CalendarOutlined } from "@ant-design/icons";
+import { Layout, Menu, Avatar, Typography } from "antd";
+import {
+  UserOutlined,
+  TeamOutlined,
+  CalendarOutlined,
+} from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import logo from "../../../assets/images/logo-ms.png";
 
 const { Sider } = Layout;
+const { Text } = Typography;
 
 const AdminSidebar = () => {
   const navigate = useNavigate();
+  const { user } = useSelector((state) => state.auth);
 
   const items = [
+    {
+      key: "/admin",
+      icon: <UserOutlined />,
+      label: "Dashboard",
+    },
     {
       key: "/admin/clients",
       icon: <UserOutlined />,
@@ -38,7 +50,10 @@ const AdminSidebar = () => {
   ];
 
   return (
-    <Sider style={{ backgroundColor: "white" }}>
+    <Sider
+      onClick={() => console.log(user)}
+      style={{ backgroundColor: "white" }}
+    >
       <div className="logo-area-c" onClick={() => navigate("/admin")}>
         <img
           src={logo}
@@ -47,11 +62,7 @@ const AdminSidebar = () => {
         />
       </div>
 
-      <Menu
-        mode="inline"
-        items={items}
-        onClick={({ key }) => navigate(key)}
-      />
+      <Menu mode="inline" items={items} onClick={({ key }) => navigate(key)} />
     </Sider>
   );
 };
