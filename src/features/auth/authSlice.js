@@ -1,10 +1,19 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { login, getProfile } from "../../api/auth";
 
-export const loginUser = createAsyncThunk("auth/login", async (credentials) => {
-  const response = await login(credentials);
-  return response;
-});
+// Modified loginUser to chain the profile fetch
+export const loginUser = createAsyncThunk(
+  "auth/login",
+  async (credentials, { dispatch }) => {
+    const response = await login(credentials);
+    // After successful login, immediately fetch profile
+    if (response.access_token) {
+      localStorage.setItem("token", response.access_token);
+      await dispatch(fetchUserProfile());
+    }
+    return response;
+  }
+);
 
 export const fetchUserProfile = createAsyncThunk(
   "auth/fetchProfile",
@@ -14,9 +23,8 @@ export const fetchUserProfile = createAsyncThunk(
   }
 );
 
-
 const initialState = {
-  user: null,
+  user: JSON.parse(localStorage.getItem("user")) || null,
   token: localStorage.getItem("token"),
   role: localStorage.getItem("role"),
   isAuthenticated: !!localStorage.getItem("token"),
@@ -31,6 +39,7 @@ const authSlice = createSlice({
     logout: (state) => {
       localStorage.removeItem("token");
       localStorage.removeItem("role");
+      localStorage.removeItem("user");
       state.user = null;
       state.token = null;
       state.role = null;
@@ -46,9 +55,10 @@ const authSlice = createSlice({
       .addCase(loginUser.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isAuthenticated = true;
-        state.user = action.payload.user;
+        // Basic user info from login
         state.token = action.payload.access_token;
         state.role = action.payload.user.role;
+        // Store in localStorage
         localStorage.setItem("token", action.payload.access_token);
         localStorage.setItem("role", action.payload.user.role);
       })
@@ -63,7 +73,11 @@ const authSlice = createSlice({
       .addCase(fetchUserProfile.fulfilled, (state, action) => {
         state.isLoading = false;
         state.user = action.payload;
+        // Update role in case it's different in full profile
+        state.role = action.payload.role;
+        // Store complete user data
         localStorage.setItem("user", JSON.stringify(action.payload));
+        localStorage.setItem("role", action.payload.role);
       })
       .addCase(fetchUserProfile.rejected, (state, action) => {
         state.isLoading = false;
