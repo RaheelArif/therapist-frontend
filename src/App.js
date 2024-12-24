@@ -11,6 +11,7 @@ import AdminLayout from "./features/admin/AdminLayout";
 import InitializeApp from './components/shared/InitializeApp';
 import TherapistLayout from "./features/therapist/components/TherapistLayout";
 import TherapistDashboard from "./features/therapist/TherapistDashboard";
+import AppointmentConfirmation from "./features/appointmentConfirmation/AppointmentConfirmation";
 
 
 const PrivateRoute = ({ children, role }) => {
@@ -36,6 +37,10 @@ const App = () => {
       <InitializeApp />
         <Routes>
           <Route path="/login" element={<LoginForm />} />
+          <Route 
+            path="/confirm-appointment/:appointmentId" 
+            element={<AppointmentConfirmation />} 
+          />
           <Route
             path="/admin/*"
             element={
