@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, Table, Select, Tag, message } from 'antd';
 import { useSelector } from 'react-redux';
-import { updateAppointment } from '../../api/appointment';
+import { getAppointments, updateAppointment } from '../../api/appointment';
 
 const { Option } = Select;
 
@@ -9,7 +9,30 @@ const TherapistDashboard = () => {
   const { user } = useSelector((state) => state.auth);
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [loading, setLoading] = useState(false);
-  const [appointments, setAppointments] = useState(user?.therapist?.appointments || []);
+  const [appointments, setAppointments] = useState([]);
+
+  // Fetch appointments when component mounts or when therapist ID changes
+  useEffect(() => {
+    const fetchAppointments = async () => {
+      if (user?.user?.therapist?.id) {
+        
+        
+        try {
+          setLoading(true);
+          const response = await getAppointments({ 
+            therapistId: user.user.therapist.id 
+          });
+          setAppointments(response);
+        } catch (error) {
+          message.error('Failed to fetch appointments');
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchAppointments();
+  }, [user?.user?.therapist?.id]);
 
   const getStatusColor = (status) => {
     const colors = {
@@ -24,15 +47,16 @@ const TherapistDashboard = () => {
   const handleStatusChange = async (value, record) => {
     try {
       setLoading(true);
-      await updateAppointment(record.id, { status: value });
+      const updatedAppointment = await updateAppointment(record.id, { status: value });
       
-      // Update local state
+      // Update local state directly with the response
       setAppointments(prev => prev.map(apt => 
-        apt.id === record.id ? { ...apt, status: value } : apt
+        apt.id === updatedAppointment.id ? updatedAppointment : apt
       ));
       
       message.success('Appointment status updated successfully');
     } catch (error) {
+      console.error('Update error:', error);
       message.error('Failed to update appointment status');
     } finally {
       setLoading(false);
@@ -42,8 +66,9 @@ const TherapistDashboard = () => {
   const columns = [
     {
       title: 'Client Name',
-      dataIndex: 'clientName',
+      dataIndex: ['client', 'user', 'fullname'],  
       key: 'clientName',
+      render: (text, record) => record.client?.user?.fullname || 'N/A', 
     },
     {
       title: 'Date',

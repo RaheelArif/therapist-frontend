@@ -1,13 +1,13 @@
-import React from 'react';
-import { Modal, Tag } from 'antd';
-import { 
-  ClockCircleOutlined, 
+import React from "react";
+import { Modal, Tag } from "antd";
+import {
+  ClockCircleOutlined,
   UserOutlined,
   EnvironmentOutlined,
   ExperimentOutlined,
-  FileTextOutlined
-} from '@ant-design/icons';
-import { format } from 'date-fns';
+  FileTextOutlined,
+} from "@ant-design/icons";
+import { format } from "date-fns";
 
 const AppointmentDetailsModal = ({ open, onClose, appointment, therapist }) => {
   if (!appointment) return null;
@@ -24,13 +24,18 @@ const AppointmentDetailsModal = ({ open, onClose, appointment, therapist }) => {
       <div className="modal-content">
         {/* Header */}
         <div className="modal-header">
-          <h2 onClick={() => console.log(appointment , open)}>Appointment Details</h2>
+          <h2 onClick={() => console.log(appointment, open)}>
+            Appointment Details
+          </h2>
         </div>
 
         {/* Date and Status */}
         <div className="appointment-date">
-          {format(new Date(appointment.start), 'EEEE, MMMM d, yyyy')}
-          <Tag className="status-tag" color={appointment.status === 'SCHEDULED' ? 'blue' : 'success'}>
+          {format(new Date(appointment.start), "EEEE, MMMM d, yyyy")}
+          <Tag
+            className="status-tag"
+            color={appointment.status === "SCHEDULED" ? "blue" : "success"}
+          >
             {appointment.status}
           </Tag>
         </div>
@@ -38,7 +43,8 @@ const AppointmentDetailsModal = ({ open, onClose, appointment, therapist }) => {
         {/* Time */}
         <div className="time-section">
           <ClockCircleOutlined />
-          {format(new Date(appointment.start), 'h:mm aaa')} - {format(new Date(appointment.end), 'h:mm aaa')}
+          {format(new Date(appointment.start), "h:mm aaa")} -{" "}
+          {format(new Date(appointment.end), "h:mm aaa")}
         </div>
 
         {/* Client and Therapist Section - Side by Side */}
@@ -53,9 +59,7 @@ const AppointmentDetailsModal = ({ open, onClose, appointment, therapist }) => {
               <div className="person-avatar">
                 <UserOutlined />
               </div>
-              <div className="person-name">
-                {appointment.title}
-              </div>
+              <div className="person-name">{appointment.title}</div>
             </div>
           </div>
 
@@ -71,8 +75,12 @@ const AppointmentDetailsModal = ({ open, onClose, appointment, therapist }) => {
               </div>
               <div className="person-content">
                 <div className="person-name">{therapist.user.fullname}</div>
-                <Tag color="blue" className="specialization-tag">{therapist.specializations.type}</Tag>
-                <div className="focus-text">Focus: {therapist.specializations.focus}</div>
+                <Tag color="blue" className="specialization-tag">
+                  {therapist.specializations.type}
+                </Tag>
+                <div className="focus-text">
+                  Focus: {therapist.specializations.focus}
+                </div>
               </div>
             </div>
           </div>
@@ -85,9 +93,7 @@ const AppointmentDetailsModal = ({ open, onClose, appointment, therapist }) => {
               <FileTextOutlined />
               Notes
             </div>
-            <div className="notes-content">
-              {appointment.notes}
-            </div>
+            <div className="notes-content">{appointment.notes}</div>
           </div>
         )}
 
@@ -95,7 +101,7 @@ const AppointmentDetailsModal = ({ open, onClose, appointment, therapist }) => {
         <div className="additional-details">
           <div className="section-title">
             <EnvironmentOutlined />
-            Additional Details 
+            Additional Details
           </div>
           <div className="details-grid">
             <div className="detail-item">
@@ -117,7 +123,16 @@ const AppointmentDetailsModal = ({ open, onClose, appointment, therapist }) => {
               <div>
                 <div className="detail-label">Working Hours</div>
                 <div className="detail-value">
-                  {therapist.availableHours[format(new Date(appointment.start), 'EEEE').toLowerCase()]}
+                  {therapist.availableHours[
+                    format(new Date(appointment.start), "EEEE").toLowerCase()
+                  ] === "unavailable"
+                    ? "Unavailable"
+                    : therapist.availableHours[
+                        format(
+                          new Date(appointment.start),
+                          "EEEE"
+                        ).toLowerCase()
+                      ]}
                 </div>
               </div>
             </div>
