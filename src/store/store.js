@@ -4,13 +4,14 @@ import authReducer from "../features/auth/authSlice";
 import clientReducer from "./client/clientSlice";
 import therapistReducer from "./therapist/therapistSlice";
 import appointmentReducer from "./appointment/appointmentSlice";
-
+import adminReducer from "./admin/adminSlice";
 // Combine all reducers
 const appReducer = combineReducers({
   auth: authReducer,
   client: clientReducer,
   therapist: therapistReducer,
   appointment: appointmentReducer,
+  admin: adminReducer, 
 });
 
 // Root reducer that handles reset on logout

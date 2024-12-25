@@ -15,7 +15,6 @@
 
 /* AppointmentModal.css */
 
-
 .appointment-modal .ant-modal-header {
   padding: 20px 24px;
   border-bottom: 1px solid #f0f0f0;
@@ -185,7 +184,9 @@
 .modal-content {
   padding: 24px;
 }
-
+.therapist-img-m {
+  height: 80px;
+}
 .modal-header {
   display: flex;
   justify-content: space-between;
@@ -348,13 +349,13 @@
   .appointment-modal {
     max-width: 95vw !important;
   }
-  
+
   .date-display {
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
   }
-  
+
   .therapist-details {
     flex-direction: column;
   }

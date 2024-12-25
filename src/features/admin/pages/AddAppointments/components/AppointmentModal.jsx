@@ -283,7 +283,7 @@ const AppointmentModal = ({
             <img 
               src={therapist?.profilePicture || 'https://via.placeholder.com/40'} 
               alt={therapist?.user.fullname}
-              className="w-10 h-10 rounded-full"
+              className="w-10 h-10 rounded-full therapist-img-m"
             />
             <div>
               <Text strong className="block">{therapist.user.fullname}</Text>
