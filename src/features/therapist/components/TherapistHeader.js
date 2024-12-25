@@ -1,4 +1,3 @@
-// features/therapist/components/TherapistHeader.js
 import React from 'react';
 import { Layout, Dropdown, Avatar, Space } from 'antd';
 import { LogoutOutlined, UserOutlined, DownOutlined } from '@ant-design/icons';
@@ -10,6 +9,10 @@ const { Header } = Layout;
 const TherapistHeader = () => {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
+
+  // Get profile picture if user is a therapist
+  const profilePicture = user?.user?.therapist?.profilePicture;
+  const fullName = user?.user?.fullname || 'Therapist';
 
   const items = [
     {
@@ -33,10 +36,16 @@ const TherapistHeader = () => {
       <Dropdown menu={{ items }} placement="bottomRight">
         <Space className="cursor-pointer">
           <Avatar 
-            icon={<UserOutlined />}
-            style={{ backgroundColor: '#1890ff' }}
+            icon={!profilePicture && <UserOutlined />}
+            src={profilePicture}
+            style={{ 
+              backgroundColor: !profilePicture ? '#1890ff' : 'transparent',
+              width: 32,
+              height: 32,
+              objectFit: 'cover'
+            }}
           />
-          <span>{user?.user?.fullname || 'Therapist'}</span>
+          <span>{fullName}</span>
           <DownOutlined />
         </Space>
       </Dropdown>

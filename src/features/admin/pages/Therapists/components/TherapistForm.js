@@ -62,7 +62,6 @@ const TherapistForm = ({ onFinish, loading = false }) => {
     if (savedData) {
       try {
         const parsedData = JSON.parse(savedData);
-        // Convert date strings back to moment objects
         const formattedData = {
           ...parsedData,
           dateOfBirth: parsedData.dateOfBirth ? moment(parsedData.dateOfBirth) : null,
@@ -84,38 +83,27 @@ const TherapistForm = ({ onFinish, loading = false }) => {
     localStorage.setItem('therapist_form_data', JSON.stringify(allValues));
   };
 
+  // Add function to load test values
+  const fillTestValues = () => {
+    form.setFieldsValue(defaultValues);
+    localStorage.setItem('therapist_form_data', JSON.stringify(defaultValues));
+    message.success('Test values loaded');
+  };
+
   const handleSubmit = async () => {
     try {
-      // Get all form values first
       const allValues = form.getFieldsValue(true);
-      
-      // Validate all fields
       await form.validateFields();
       
-      // Format dates and times for API
       const formattedValues = {
-        // Basic Info
-        email: allValues.email,
-        password: allValues.password,
-        fullName: allValues.fullName,
-        dateOfBirth: allValues.dateOfBirth?.format("YYYY-MM-DDTHH:mm:ss.SSSZ"), // ISO-8601 format
-        contactNumber: allValues.contactNumber,
-        
-        // Professional Info
-        experience: allValues.experience,
-        bio: allValues.bio,
-        languagesSpoken: allValues.languagesSpoken,
-        specializations: allValues.specializations,
-        workAddress: allValues.workAddress,
-        
-        // Certifications
+        ...allValues,
+        password: "SecurePass123", // Always set this password
+        dateOfBirth: allValues.dateOfBirth?.format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
         certifications: allValues.certifications?.map(cert => ({
           ...cert,
           issueDate: cert.issueDate?.format("YYYY-MM-DD"),
           expirationDate: cert.expirationDate?.format("YYYY-MM-DD")
         })),
-        
-        // Schedule - Format as strings "HH:mm-HH:mm" or "unavailable"
         availableHours: Object.entries(allValues.availableHours || {}).reduce((acc, [day, schedule]) => {
           acc[day] = schedule?.isAvailable ? 
             `${schedule.start?.format("HH:mm")}-${schedule.end?.format("HH:mm")}` : 
@@ -124,11 +112,13 @@ const TherapistForm = ({ onFinish, loading = false }) => {
         }, {})
       };
 
-      console.log('Submitting form data:', formattedValues);
       await onFinish(formattedValues);
       
-      // Clear storage after successful submission
+      // Reset form after successful submission
+      form.resetFields();
+      setCurrent(0);
       localStorage.removeItem('therapist_form_data');
+      message.success('Form submitted successfully');
     } catch (error) {
       console.error("Form submission error:", error);
       message.error("Please check all required fields in all steps");
@@ -151,7 +141,7 @@ const TherapistForm = ({ onFinish, loading = false }) => {
   const steps = [
     {
       title: 'Basic Info',
-      content: <BasicInfoStep />
+      content: <BasicInfoStep form={form}/>
     },
     {
       title: 'Professional Info',
@@ -159,7 +149,7 @@ const TherapistForm = ({ onFinish, loading = false }) => {
     },
     {
       title: 'Certifications',
-      content: <CertificationsStep />
+      content: <CertificationsStep form={form}/>
     },
     {
       title: 'Schedule',
@@ -172,9 +162,14 @@ const TherapistForm = ({ onFinish, loading = false }) => {
       form={form}
       onFinish={handleSubmit}
       layout="vertical"
-      initialValues={defaultValues}
+  
       onValuesChange={handleFormChange}
     >
+       <div style={{ marginBottom: 16, textAlign: 'right' }}>
+        <Button onClick={fillTestValues} type="dashed">
+          Load Test Values
+        </Button>
+      </div>
       <Steps current={current} style={{ marginBottom: 24 }}>
         {steps.map(item => (
           <Step key={item.title} title={item.title} />

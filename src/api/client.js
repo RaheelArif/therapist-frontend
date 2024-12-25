@@ -27,13 +27,25 @@ export const deleteClient = async (id) => {
 };
 
 export const uploadFile = async (file) => {
-  const formData = new FormData();
-  formData.append('file', file);
-  
-  const response = await axios.post('/upload', formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  });
-  return response.data;
+  try {
+    // Create a new file with modified name
+    const modifiedFile = new File(
+      [file],
+      file.name.replace(/\s+/g, '_'), // Replace all spaces with underscores
+      { type: file.type }
+    );
+
+    const formData = new FormData();
+    formData.append('file', modifiedFile);
+    
+    const response = await axios.post('/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Upload error:', error);
+    throw error;
+  }
 };
