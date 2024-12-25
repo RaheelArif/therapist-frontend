@@ -25,3 +25,15 @@ export const deleteClient = async (id) => {
   const response = await axios.delete(`/admin/delete-client/${id}`);
   return response.data;
 };
+
+export const uploadFile = async (file) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  
+  const response = await axios.post('/upload', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+  return response.data;
+};

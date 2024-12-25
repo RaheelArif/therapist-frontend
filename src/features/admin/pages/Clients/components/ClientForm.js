@@ -86,48 +86,43 @@ const defaultValues = {
 const ClientForm = ({ onFinish, loading = false }) => {
   const [form] = Form.useForm();
   const [current, setCurrent] = React.useState(0);
-  const [allFormData, setAllFormData] = React.useState(defaultValues);
-
+  const [allFormData, setAllFormData] = React.useState({}); 
+   
   const handleSubmit = async () => {
     try {
-      // Validate current step before submission
       const currentValues = await form.validateFields();
-      
-      // Get the current form values
       const currentClientInfo = form.getFieldValue('clientInfo') || {};
       
       // Combine all form data
       const combinedData = {
         ...allFormData,
         ...currentValues,
+        password: "SecurePassword123", // Always set this password
         clientInfo: {
           ...allFormData.clientInfo,
           ...currentClientInfo,
-          // Format as ISO-8601 DateTime string
           dob: currentClientInfo?.dob ? moment(currentClientInfo.dob).format("YYYY-MM-DDTHH:mm:ss.SSSZ") : null,
           timeOfBirth: currentClientInfo?.timeOfBirth ? currentClientInfo.timeOfBirth.format("HH:mm:ss") : null,
         },
         complaint: (currentValues.complaint || []).map(complaint => ({
           ...complaint,
-          // Format complaint dates as ISO-8601 DateTime string
           startDate: complaint.startDate ? moment(complaint.startDate).format("YYYY-MM-DDTHH:mm:ss.SSSZ") : null,
         })),
         fileUpload: currentValues.fileUpload || allFormData.fileUpload || [],
-        parentInformation: currentValues.parentInformation || allFormData.parentInformation || defaultValues.parentInformation || [],
+        parentInformation: currentValues.parentInformation || allFormData.parentInformation || [],
       };
 
-      // Validate required fields before submission
       if (!combinedData.clientInfo.dob) {
         throw new Error('Date of Birth is required');
       }
 
-      // Log the final payload (without sensitive data)
-      console.log("Submitting form data:", {
-        ...combinedData,
-        password: '[REDACTED]'
-      });
-
-      onFinish(combinedData);
+      await onFinish(combinedData);
+      
+      // Reset form after successful submission
+      form.resetFields();
+      setAllFormData({});
+      setCurrent(0);
+      message.success('Form submitted successfully');
     } catch (error) {
       console.error("Form submission error:", error);
       message.error(error.message || "Please check all required fields");
@@ -207,18 +202,27 @@ const ClientForm = ({ onFinish, loading = false }) => {
     },
     {
       title: "Documents",
-      content: <FileUploadForm />
+      content: <FileUploadForm form={form} />
     }
   ];
-
+  const fillTestValues = () => {
+    form.setFieldsValue(defaultValues);
+    setAllFormData(defaultValues);
+    message.success('Test values loaded');
+  };
   return (
     <Form
       form={form}
       onFinish={handleSubmit}
       layout="vertical"
-      initialValues={defaultValues}
+      // initialValues={allFormData}
       onValuesChange={handleFormChange}
     >
+       <div style={{ marginBottom: 16, textAlign: 'right' }}>
+        <Button onClick={fillTestValues} type="dashed">
+          Load Test Values
+        </Button>
+      </div>
       <Steps current={current} style={{ marginBottom: 24 }}>
         {steps.map((item) => (
           <Step key={item.title} title={item.title} />

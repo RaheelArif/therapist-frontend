@@ -16,13 +16,7 @@ const BasicInfoForm = () => (
     >
       <Input />
     </Form.Item>
-    <Form.Item
-      name="password"
-      label="Password"
-      rules={[{ required: true, message: "Password is required" }]}
-    >
-      <Input.Password />
-    </Form.Item>
+  
     <Form.Item
       name="fullname"
       label="Full Name"

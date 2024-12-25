@@ -171,11 +171,11 @@
 .appointment-modal.ant-modal-enter .ant-modal-content {
   transform: translateY(20px);
 }
-.ant-select-selector {
+/* .ant-select-selector {
   padding: 0;
   border: none !important;
   background: 'transparent !important';
-}
+} */
 .appointment-modal .ant-modal-content {
   padding: 0;
   border-radius: 12px;
