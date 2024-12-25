@@ -113,7 +113,7 @@ const AppointmentsPage = () => {
     const colors = {
       SCHEDULED: "processing",
       COMPLETED: "success",
-      CANCELLED: "error",
+      CANCELED: "error",
       RESCHEDULED: "warning",
     };
     return colors[status] || "default";
@@ -163,8 +163,8 @@ const AppointmentsPage = () => {
             <Option value="COMPLETED">
               <Tag color="success">COMPLETED</Tag>
             </Option>
-            <Option value="CANCELLED">
-              <Tag color="error">CANCELLED</Tag>
+            <Option value="CANCELED">
+              <Tag color="error">CANCELED</Tag>
             </Option>
             <Option value="RESCHEDULED">
               <Tag color="warning">RESCHEDULED</Tag>
@@ -277,7 +277,7 @@ const AppointmentsPage = () => {
           >
             <Option value="SCHEDULED">Scheduled</Option>
             <Option value="COMPLETED">Completed</Option>
-            <Option value="CANCELLED">Cancelled</Option>
+            <Option value="CANCELED">CANCELED</Option>
             <Option value="RESCHEDULED">Rescheduled</Option>
           </Select>
         </div>

@@ -260,7 +260,7 @@ const AppointmentsPage = () => {
       style.opacity = 0.9;
     }
 
-    if (event.status === "CANCELLED") {
+    if (event.status === "CANCELED") {
       style.backgroundColor = "#ff4d4f"; // Solid red
       style.color = "white";
       style.opacity = 0.9;

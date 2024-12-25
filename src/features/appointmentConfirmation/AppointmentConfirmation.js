@@ -42,7 +42,7 @@ const AppointmentConfirmation = () => {
     const colors = {
       SCHEDULED: 'blue',
       COMPLETED: 'green',
-      CANCELLED: 'red',
+      CANCELED: 'red',
       RESCHEDULED: 'orange',
     };
     return colors[status] || 'default';

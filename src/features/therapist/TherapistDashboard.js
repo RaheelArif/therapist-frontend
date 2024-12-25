@@ -38,7 +38,7 @@ const TherapistDashboard = () => {
     const colors = {
       SCHEDULED: 'blue',
       COMPLETED: 'green',
-      CANCELLED: 'red',
+      CANCELED: 'red',
       RESCHEDULED: 'orange',
     };
     return colors[status] || 'default';
@@ -110,8 +110,8 @@ const TherapistDashboard = () => {
           <Option value="COMPLETED">
             <Tag color={getStatusColor('COMPLETED')}>COMPLETED</Tag>
           </Option>
-          <Option value="CANCELLED">
-            <Tag color={getStatusColor('CANCELLED')}>CANCELLED</Tag>
+          <Option value="CANCELED">
+            <Tag color={getStatusColor('CANCELED')}>CANCELED</Tag>
           </Option>
           <Option value="RESCHEDULED">
             <Tag color={getStatusColor('RESCHEDULED')}>RESCHEDULED</Tag>
@@ -121,7 +121,7 @@ const TherapistDashboard = () => {
       filters: [
         { text: 'Scheduled', value: 'SCHEDULED' },
         { text: 'Completed', value: 'COMPLETED' },
-        { text: 'Cancelled', value: 'CANCELLED' },
+        { text: 'CANCELED', value: 'CANCELED' },
         { text: 'Rescheduled', value: 'RESCHEDULED' },
       ],
       onFilter: (value, record) => record.status === value,
@@ -152,7 +152,7 @@ const TherapistDashboard = () => {
             <Option value="ALL">All Status</Option>
             <Option value="SCHEDULED">Scheduled</Option>
             <Option value="COMPLETED">Completed</Option>
-            <Option value="CANCELLED">Cancelled</Option>
+            <Option value="CANCELED">CANCELED</Option>
             <Option value="RESCHEDULED">Rescheduled</Option>
           </Select>
         }
