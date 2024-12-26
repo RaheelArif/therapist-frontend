@@ -78,5 +78,5 @@ const App = () => {
 
 export default App;
 
-// "email": admin@example.com
+// "email": admin@example.com 
 //   "password": securePassword123
