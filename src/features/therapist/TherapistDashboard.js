@@ -3,6 +3,7 @@ import { Card, Table, Select, Tag, Button, message } from 'antd';
 import { useSelector } from 'react-redux';
 import { getAppointments } from '../../api/appointment';
 import ChangeStatusModal from './components/ChangeStatusModal';
+import AddDocumentsModal from './components/AddDocumentsModal';
 
 const { Option } = Select;
 
@@ -11,7 +12,8 @@ const TherapistDashboard = () => {
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [loading, setLoading] = useState(false);
   const [appointments, setAppointments] = useState([]);
-  const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const [selectedStatusAppointment, setSelectedStatusAppointment] = useState(null);
+  const [selectedDocumentAppointment, setSelectedDocumentAppointment] = useState(null);
 
   // Fetch appointments
   useEffect(() => {
@@ -81,11 +83,23 @@ const TherapistDashboard = () => {
           <Tag color={getStatusColor(status)}>{status}</Tag>
           <Button
             type="link"
-            onClick={() => setSelectedAppointment(record)}
+            onClick={() => setSelectedStatusAppointment(record)}
           >
             Change Status
           </Button>
         </>
+      ),
+    },
+    {
+      title: 'Documents',
+      key: 'documents',
+      render: (_, record) => (
+        <Button
+          type="link"
+          onClick={() => setSelectedDocumentAppointment(record)}
+        >
+          Add/View Documents
+        </Button>
       ),
     },
     {
@@ -132,17 +146,34 @@ const TherapistDashboard = () => {
         />
       </Card>
 
-      {selectedAppointment && (
+      {/* Change Status Modal */}
+      {selectedStatusAppointment && (
         <ChangeStatusModal
-          appointment={selectedAppointment}
-          onClose={() => setSelectedAppointment(null)}
+          appointment={selectedStatusAppointment}
+          onClose={() => setSelectedStatusAppointment(null)}
           onSuccess={(updatedAppointment) => {
             setAppointments((prev) =>
               prev.map((apt) =>
                 apt.id === updatedAppointment.id ? updatedAppointment : apt
               )
             );
-            setSelectedAppointment(null);
+            setSelectedStatusAppointment(null);
+          }}
+        />
+      )}
+
+      {/* Add Documents Modal */}
+      {selectedDocumentAppointment && (
+        <AddDocumentsModal
+          appointment={selectedDocumentAppointment}
+          onClose={() => setSelectedDocumentAppointment(null)}
+          onSuccess={(updatedAppointment) => {
+            setAppointments((prev) =>
+              prev.map((apt) =>
+                apt.id === updatedAppointment.id ? updatedAppointment : apt
+              )
+            );
+            setSelectedDocumentAppointment(null);
           }}
         />
       )}
