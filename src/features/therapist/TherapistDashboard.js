@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Table, Select, Tag, message } from 'antd';
+import { Card, Table, Select, Tag, Button, message } from 'antd';
 import { useSelector } from 'react-redux';
-import { getAppointments, updateAppointment } from '../../api/appointment';
+import { getAppointments } from '../../api/appointment';
+import ChangeStatusModal from './components/ChangeStatusModal';
 
 const { Option } = Select;
 
@@ -10,18 +11,15 @@ const TherapistDashboard = () => {
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [loading, setLoading] = useState(false);
   const [appointments, setAppointments] = useState([]);
+  const [selectedAppointment, setSelectedAppointment] = useState(null);
 
-  // Fetch appointments when component mounts or when therapist ID changes
+  // Fetch appointments
   useEffect(() => {
     const fetchAppointments = async () => {
       if (user?.user?.therapist?.id) {
-        
-        
         try {
           setLoading(true);
-          const response = await getAppointments({ 
-            therapistId: user.user.therapist.id 
-          });
+          const response = await getAppointments({ therapistId: user.user.therapist.id });
           setAppointments(response);
         } catch (error) {
           message.error('Failed to fetch appointments');
@@ -44,31 +42,12 @@ const TherapistDashboard = () => {
     return colors[status] || 'default';
   };
 
-  const handleStatusChange = async (value, record) => {
-    try {
-      setLoading(true);
-      const updatedAppointment = await updateAppointment(record.id, { status: value });
-      
-      // Update local state directly with the response
-      setAppointments(prev => prev.map(apt => 
-        apt.id === updatedAppointment.id ? updatedAppointment : apt
-      ));
-      
-      message.success('Appointment status updated successfully');
-    } catch (error) {
-      console.error('Update error:', error);
-      message.error('Failed to update appointment status');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const columns = [
     {
       title: 'Client Name',
-      dataIndex: ['client', 'user', 'fullname'],  
+      dataIndex: ['client', 'user', 'fullname'],
       key: 'clientName',
-      render: (text, record) => record.client?.user?.fullname || 'N/A', 
+      render: (text, record) => record.client?.user?.fullname || 'N/A',
     },
     {
       title: 'Date',
@@ -82,13 +61,13 @@ const TherapistDashboard = () => {
       dataIndex: 'startTime',
       key: 'time',
       render: (text, record) => {
-        const start = new Date(record.startTime).toLocaleTimeString([], { 
-          hour: '2-digit', 
-          minute: '2-digit' 
+        const start = new Date(record.startTime).toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit',
         });
-        const end = new Date(record.endTime).toLocaleTimeString([], { 
-          hour: '2-digit', 
-          minute: '2-digit' 
+        const end = new Date(record.endTime).toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit',
         });
         return `${start} - ${end}`;
       },
@@ -98,33 +77,16 @@ const TherapistDashboard = () => {
       dataIndex: 'status',
       key: 'status',
       render: (status, record) => (
-        <Select
-          value={status}
-          style={{ width: 130 }}
-          onChange={(value) => handleStatusChange(value, record)}
-          disabled={loading}
-        >
-          <Option value="SCHEDULED">
-            <Tag color={getStatusColor('SCHEDULED')}>SCHEDULED</Tag>
-          </Option>
-          <Option value="COMPLETED">
-            <Tag color={getStatusColor('COMPLETED')}>COMPLETED</Tag>
-          </Option>
-          <Option value="CANCELED">
-            <Tag color={getStatusColor('CANCELED')}>CANCELED</Tag>
-          </Option>
-          <Option value="RESCHEDULED">
-            <Tag color={getStatusColor('RESCHEDULED')}>RESCHEDULED</Tag>
-          </Option>
-        </Select>
+        <>
+          <Tag color={getStatusColor(status)}>{status}</Tag>
+          <Button
+            type="link"
+            onClick={() => setSelectedAppointment(record)}
+          >
+            Change Status
+          </Button>
+        </>
       ),
-      filters: [
-        { text: 'Scheduled', value: 'SCHEDULED' },
-        { text: 'Completed', value: 'COMPLETED' },
-        { text: 'CANCELED', value: 'CANCELED' },
-        { text: 'Rescheduled', value: 'RESCHEDULED' },
-      ],
-      onFilter: (value, record) => record.status === value,
     },
     {
       title: 'Notes',
@@ -135,16 +97,16 @@ const TherapistDashboard = () => {
     },
   ];
 
-  const filteredAppointments = appointments.filter(apt => 
+  const filteredAppointments = appointments.filter((apt) =>
     statusFilter === 'ALL' ? true : apt.status === statusFilter
   );
 
   return (
     <div className="p-6">
-      <Card 
+      <Card
         title="My Appointments"
         extra={
-          <Select 
+          <Select
             defaultValue="ALL"
             style={{ width: 120 }}
             onChange={setStatusFilter}
@@ -157,8 +119,8 @@ const TherapistDashboard = () => {
           </Select>
         }
       >
-        <Table 
-          columns={columns} 
+        <Table
+          columns={columns}
           dataSource={filteredAppointments}
           rowKey="id"
           loading={loading}
@@ -169,6 +131,21 @@ const TherapistDashboard = () => {
           scroll={{ x: 'max-content' }}
         />
       </Card>
+
+      {selectedAppointment && (
+        <ChangeStatusModal
+          appointment={selectedAppointment}
+          onClose={() => setSelectedAppointment(null)}
+          onSuccess={(updatedAppointment) => {
+            setAppointments((prev) =>
+              prev.map((apt) =>
+                apt.id === updatedAppointment.id ? updatedAppointment : apt
+              )
+            );
+            setSelectedAppointment(null);
+          }}
+        />
+      )}
     </div>
   );
 };
