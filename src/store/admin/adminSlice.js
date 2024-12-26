@@ -64,7 +64,7 @@ const adminSlice = createSlice({
         state.loading = false;
         state.admins = action.payload.data; // Admin data
         state.total = action.payload.total; // Total number of admins
-        state.currentPage = action.meta.arg.page; // Current page
+        state.currentPage = action.payload.page; // Current page
       })
       .addCase(fetchAdmins.rejected, (state, action) => {
         state.loading = false;
