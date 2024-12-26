@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Card, Tag, Spin, message, Input, Button, Row, Col, Timeline } from 'antd';
+import { Card, Tag, Spin, message, Input, Button, Row, Col, Timeline, List, Typography } from 'antd';
 import { getAppointmentById, createClientNote } from '../../api/appointment';
 import dayjs from 'dayjs';
 import { 
@@ -8,10 +8,12 @@ import {
   CalendarOutlined,
   UserOutlined,
   FileTextOutlined,
-  SendOutlined
+  SendOutlined,
+  DownloadOutlined
 } from '@ant-design/icons';
 
 const { TextArea } = Input;
+const { Text } = Typography;
 
 const AppointmentConfirmation = () => {
   const { appointmentId } = useParams();
@@ -169,7 +171,51 @@ const AppointmentConfirmation = () => {
           </Col>
 
           {/* Client Notes History */}
-          {appointment.clientNotes?.length > 0 && (
+      
+
+          {/* Documents */}
+          {appointment.documents?.length > 0 && (
+            <Col span={24}>
+              <Card 
+                type="inner" 
+                title={
+                  <div className="flex items-center gap-2">
+                    <FileTextOutlined />
+                    <span>Documents</span>
+                  </div>
+                }
+              >
+                <List
+                  header={<Text strong>Previous Documents</Text>}
+                  bordered
+                  dataSource={appointment.documents}
+                  renderItem={(doc) => (
+                    <List.Item
+                      actions={[
+                        doc.pdfLink ? (
+                          <Button
+                            type="link"
+                            href={doc.pdfLink}
+                            target="_blank"
+                            icon={<DownloadOutlined />}
+                          >
+                            Download
+                          </Button>
+                        ) : null,
+                      ]}
+                    >
+                      <List.Item.Meta
+                        title={`Notes: ${doc.notes || 'No notes provided'}`}
+                        description={`Added on: ${new Date(doc.createdAt).toLocaleString()}`}
+                      />
+                    </List.Item>
+                  )}
+                />
+              </Card>
+            </Col>
+          )}
+
+{appointment.clientNotes?.length > 0 && (
             <Col span={24}>
               <Card 
                 type="inner" 
@@ -200,7 +246,6 @@ const AppointmentConfirmation = () => {
               </Card>
             </Col>
           )}
-
           {/* Add Client Notes Section */}
           <Col span={24}>
             <Card 
