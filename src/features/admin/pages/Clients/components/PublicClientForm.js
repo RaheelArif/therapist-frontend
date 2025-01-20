@@ -134,7 +134,7 @@ const PublicClientForm = () => {
             setAllFormData({});
             setCurrent(0);
             message.success('Client added successfully');
-            navigate('/login');
+
 
 
         } catch (err) {

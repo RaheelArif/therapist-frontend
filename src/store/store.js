@@ -2,7 +2,6 @@
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import authReducer from "../features/auth/authSlice";
 import clientReducer from "./client/clientSlice";
-import userClientReducer from "./client/userClientSlice";
 import therapistReducer from "./therapist/therapistSlice";
 import appointmentReducer from "./appointment/appointmentSlice";
 import adminReducer from "./admin/adminSlice";
@@ -10,7 +9,7 @@ import adminReducer from "./admin/adminSlice";
 const appReducer = combineReducers({
   auth: authReducer,
   client: clientReducer,
-  userClient: userClientReducer,
+
   therapist: therapistReducer,
   appointment: appointmentReducer,
   admin: adminReducer,
