@@ -1,3 +1,4 @@
+// App.js
 import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Provider } from "react-redux";
@@ -12,6 +13,7 @@ import InitializeApp from './components/shared/InitializeApp';
 import TherapistLayout from "./features/therapist/components/TherapistLayout";
 import TherapistDashboard from "./features/therapist/TherapistDashboard";
 import AppointmentConfirmation from "./features/appointmentConfirmation/AppointmentConfirmation";
+import PublicClientForm from "./features/admin/pages/Clients/components/PublicClientForm"; // Import the new component
 
 
 const PrivateRoute = ({ children, role }) => {
@@ -41,6 +43,9 @@ const App = () => {
             path="/confirm-appointment/:appointmentId" 
             element={<AppointmentConfirmation />} 
           />
+   
+          <Route path="/add-client" element={<PublicClientForm />} />
+
           <Route
             path="/admin/*"
             element={

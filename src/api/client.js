@@ -26,6 +26,11 @@ export const deleteClient = async (id) => {
   return response.data;
 };
 
+export const createUserClient = async (data) => {
+  const response = await axios.post("client/create-client", data);
+  return response.data;
+};
+
 export const uploadFile = async (file) => {
   try {
     // Create a new file with modified name
