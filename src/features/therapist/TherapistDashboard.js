@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import { getAppointments } from '../../api/appointment';
 import ChangeStatusModal from './components/ChangeStatusModal';
 import AddDocumentsModal from './components/AddDocumentsModal';
+import ViewNotesModal from './components/ViewNotesModal';
 
 const { Option } = Select;
 
@@ -14,7 +15,7 @@ const TherapistDashboard = () => {
   const [appointments, setAppointments] = useState([]);
   const [selectedStatusAppointment, setSelectedStatusAppointment] = useState(null);
   const [selectedDocumentAppointment, setSelectedDocumentAppointment] = useState(null);
-
+    const [selectedNoteAppointment, setSelectedNoteAppointment] = useState(null);
   // Fetch appointments
   useEffect(() => {
     const fetchAppointments = async () => {
@@ -43,6 +44,10 @@ const TherapistDashboard = () => {
     };
     return colors[status] || 'default';
   };
+
+  const handleViewNotes = (record) => {
+        setSelectedNoteAppointment(record);
+    };
 
   const columns = [
     {
@@ -91,6 +96,20 @@ const TherapistDashboard = () => {
       ),
     },
     {
+        title: 'Notes',
+        key: 'notes',
+        render: (_, record) => {
+            if (record.clientNotes && record.clientNotes.length > 0) {
+                return (
+                    <Button type="link" onClick={() => handleViewNotes(record)}>
+                        View Notes
+                    </Button>
+                );
+            }
+            return null
+        },
+    },
+    {
       title: 'Documents',
       key: 'documents',
       render: (_, record) => (
@@ -101,13 +120,6 @@ const TherapistDashboard = () => {
           Add/View Documents
         </Button>
       ),
-    },
-    {
-      title: 'Notes',
-      dataIndex: 'notes',
-      key: 'notes',
-      ellipsis: true,
-      width: 200,
     },
   ];
 
@@ -177,6 +189,15 @@ const TherapistDashboard = () => {
           }}
         />
       )}
+
+       {/* View Notes Modal */}
+       {selectedNoteAppointment && (
+           <ViewNotesModal
+               appointment={selectedNoteAppointment}
+               onClose={() => setSelectedNoteAppointment(null)}
+
+           />
+       )}
     </div>
   );
 };
