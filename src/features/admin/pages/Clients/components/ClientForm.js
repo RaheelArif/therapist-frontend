@@ -14,7 +14,6 @@ import {
 
 const { Step } = Steps;
 
-// We don't need the formatDate function anymore as we're using simpler date formatting
 
 const defaultValues = {
   email: "client.1@example.com",
@@ -83,11 +82,34 @@ const defaultValues = {
   ]
 };
 
-const ClientForm = ({ onFinish, loading = false }) => {
+
+const ClientForm = ({ onFinish, loading = false, initialValues }) => {
   const [form] = Form.useForm();
   const [current, setCurrent] = React.useState(0);
   const [allFormData, setAllFormData] = React.useState({}); 
    
+  React.useEffect(() => {
+      if (initialValues) {
+          const { user, ...clientData } = initialValues;
+          const formattedValues = {
+            ...clientData,
+              email: user.email,
+              fullname: user.fullname,
+              clientInfo: {
+                  ...clientData.clientInfo,
+                  dob: clientData.clientInfo?.dob ? moment(clientData.clientInfo.dob) : null,
+                  timeOfBirth: clientData.clientInfo?.timeOfBirth ? moment(clientData.clientInfo.timeOfBirth, "HH:mm:ss") : null
+              },
+              complaint: (clientData.complaint || []).map(complaint => ({
+                  ...complaint,
+                  startDate: complaint.startDate ? moment(complaint.startDate) : null,
+              }))
+          };
+         form.setFieldsValue(formattedValues);
+        setAllFormData(formattedValues);
+      }
+  }, [form, initialValues]);
+
   const handleSubmit = async () => {
     try {
       const currentValues = await form.validateFields();
@@ -158,19 +180,19 @@ const ClientForm = ({ onFinish, loading = false }) => {
     setCurrent(current - 1);
   };
 
-  // Save form data on every change
+    // Save form data on every change
   const handleFormChange = (changedValues, allValues) => {
-    setAllFormData(prev => ({
-      ...prev,
-      ...allValues,
-      clientInfo: {
-        ...prev.clientInfo,
-        ...allValues.clientInfo
-      },
-      parentInformation: allValues.parentInformation || prev.parentInformation || defaultValues.parentInformation,
-      complaint: allValues.complaint || prev.complaint || [],
-      fileUpload: allValues.fileUpload || prev.fileUpload || [],
-    }));
+      setAllFormData(prev => ({
+          ...prev,
+          ...allValues,
+          clientInfo: {
+              ...prev.clientInfo,
+              ...allValues.clientInfo
+          },
+          parentInformation: allValues.parentInformation || prev.parentInformation || defaultValues.parentInformation,
+          complaint: allValues.complaint || prev.complaint || [],
+          fileUpload: allValues.fileUpload || prev.fileUpload || [],
+      }));
   };
 
   const steps = [
@@ -205,10 +227,11 @@ const ClientForm = ({ onFinish, loading = false }) => {
       content: <FileUploadForm form={form} />
     }
   ];
+
   const fillTestValues = () => {
-    form.setFieldsValue(defaultValues);
-    setAllFormData(defaultValues);
-    message.success('Test values loaded');
+      form.setFieldsValue(defaultValues);
+      setAllFormData(defaultValues);
+      message.success('Test values loaded');
   };
   return (
     <Form
@@ -218,10 +241,10 @@ const ClientForm = ({ onFinish, loading = false }) => {
       // initialValues={allFormData}
       onValuesChange={handleFormChange}
     >
-       <div style={{ marginBottom: 16, textAlign: 'right' }}>
-        <Button onClick={fillTestValues} type="dashed">
-          Load Test Values
-        </Button>
+         <div style={{ marginBottom: 16, textAlign: 'right' }}>
+          <Button onClick={fillTestValues} type="dashed">
+              Load Test Values
+          </Button>
       </div>
       <Steps current={current} style={{ marginBottom: 24 }}>
         {steps.map((item) => (

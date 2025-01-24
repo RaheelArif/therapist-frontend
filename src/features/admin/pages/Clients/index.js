@@ -164,7 +164,7 @@ const ClientsPage = () => {
       >
         <ClientForm
           onFinish={editingClient ? handleEditSubmit : handleAddClient}
-          initialValues={editingClient}
+          initialValues={editingClient} // Pass editing client to the form 
           loading={status === "loading"}
         />
       </Modal>
