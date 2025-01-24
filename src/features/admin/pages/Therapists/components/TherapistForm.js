@@ -97,7 +97,6 @@ const TherapistForm = ({ onFinish, loading = false }) => {
       
       const formattedValues = {
         ...allValues,
-        password: "SecurePass123", // Always set this password
         dateOfBirth: allValues.dateOfBirth?.format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
         certifications: allValues.certifications?.map(cert => ({
           ...cert,
