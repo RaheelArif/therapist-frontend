@@ -102,7 +102,7 @@ const ClientDetails = ({ appointments, setAppointments, user, record }) => {
 
   return (
     <>
-      <Button type="primary" onClick={() => handleClientDetails(record)}>
+      <Button  onClick={() => handleClientDetails(record)}>
         Client Details
       </Button>
       <Modal

@@ -141,18 +141,18 @@ const TherapistDashboard = () => {
         />
       ),
     },
-    {
-      title: "Client Files",
-      key: "clientFiles",
-      render: (_, record) => {
-        if (record.client?.fileUpload && record.client.fileUpload.length > 0) {
-          return (
-            <Button onClick={() => handleViewFile(record)}>Client Files</Button>
-          );
-        }
-        return "No Client Files";
-      },
-    },
+    // {
+    //   title: "Client Files",
+    //   key: "clientFiles",
+    //   render: (_, record) => {
+    //     if (record.client?.fileUpload && record.client.fileUpload.length > 0) {
+    //       return (
+    //         <Button onClick={() => handleViewFile(record)}>Client Files</Button>
+    //       );
+    //     }
+    //     return "No Client Files";
+    //   },
+    // },
   ];
 
   const filteredAppointments = appointments.filter((apt) =>
