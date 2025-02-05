@@ -6,6 +6,7 @@ import ChangeStatusModal from "./components/ChangeStatusModal";
 import AddDocumentsModal from "./components/AddDocumentsModal";
 import ViewNotesModal from "./components/ViewNotesModal";
 import FileViewerModal from "./components/FileViewerModal";
+import ClientDetails from "./components/ClientDetails";
 
 const { Option } = Select;
 
@@ -126,6 +127,18 @@ const TherapistDashboard = () => {
         >
           Add/View Documents
         </Button>
+      ),
+    },
+    {
+      title: "Client Details",
+      key: "clientDetails",
+      render: (_, record) => (
+        <ClientDetails
+          user={user}
+          appointments={appointments}
+          setAppointments={setAppointments}
+          record={record}
+        />
       ),
     },
     {
