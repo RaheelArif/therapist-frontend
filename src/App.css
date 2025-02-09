@@ -344,6 +344,25 @@
   max-height: 150px;
   overflow-y: auto;
 }
+.my-calendar{
+}
+.offline-date-manager {
+  padding: 20px;
+}
+
+.my-calendar .offline-date {
+  background-color: #ffcccb; /* Light red */
+}
+
+.selected-date {
+  background-color: #90ee90; /* Light green */
+}
+
+ /* Highlight current select date */
+.ant-calendar-selected-date .ant-calendar-date,
+.ant-calendar-selected-day .ant-calendar-date {
+  background: #90ee90; /* Light green */
+}
 /* Responsive */
 @media (max-width: 576px) {
   .appointment-modal {

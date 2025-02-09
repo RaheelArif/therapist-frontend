@@ -4,6 +4,7 @@ import {
   UserOutlined,
   TeamOutlined,
   CalendarOutlined,
+  SettingOutlined, // Added icon for Offline Dates
 } from "@ant-design/icons";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -48,21 +49,26 @@ const AdminSidebar = () => {
       icon: <TeamOutlined />,
       label: "Add Appointment",
     },
+    {
+      key: "/admin/offline-dates", // NEW ROUTE
+      icon: <SettingOutlined />, // Using a settings icon, but choose what's appropriate
+      label: "Offline Dates",
+    },
   ];
 
   // Function to find the selected key based on current path
   const getSelectedKey = () => {
     // Check if we're on the exact admin path
-    if (location.pathname === '/admin') {
-      return ['/admin'];
+    if (location.pathname === "/admin") {
+      return ["/admin"];
     }
-    
+
     // Find the menu item that matches the current path
-    const selectedItem = items.find(item => 
-      location.pathname.startsWith(item.key) && item.key !== '/admin'
+    const selectedItem = items.find(
+      (item) => location.pathname.startsWith(item.key) && item.key !== "/admin"
     );
-    
-    return selectedItem ? [selectedItem.key] : ['/admin'];
+
+    return selectedItem ? [selectedItem.key] : ["/admin"];
   };
 
   return (
@@ -75,9 +81,9 @@ const AdminSidebar = () => {
         />
       </div>
 
-      <Menu 
-        mode="inline" 
-        items={items} 
+      <Menu
+        mode="inline"
+        items={items}
         onClick={({ key }) => navigate(key)}
         selectedKeys={getSelectedKey()}
       />

@@ -9,12 +9,12 @@ import Profile from "./features/common/Profile";
 import { useSelector } from "react-redux";
 import "./App.css";
 import AdminLayout from "./features/admin/AdminLayout";
-import InitializeApp from './components/shared/InitializeApp';
+import InitializeApp from "./components/shared/InitializeApp";
 import TherapistLayout from "./features/therapist/components/TherapistLayout";
 import TherapistDashboard from "./features/therapist/TherapistDashboard";
 import AppointmentConfirmation from "./features/appointmentConfirmation/AppointmentConfirmation";
 import PublicClientForm from "./features/admin/pages/Clients/components/PublicClientForm"; // Import the new component
-
+import OfflineDateManager from "./features/admin/pages/OfflineDateManager"; // Import the OfflineDateManager Component
 
 const PrivateRoute = ({ children, role }) => {
   const { isAuthenticated, role: userRole } = useSelector(
@@ -36,14 +36,14 @@ const App = () => {
   return (
     <Provider store={store}>
       <BrowserRouter>
-      <InitializeApp />
+        <InitializeApp />
         <Routes>
           <Route path="/login" element={<LoginForm />} />
-          <Route 
-            path="/confirm-appointment/:appointmentId" 
-            element={<AppointmentConfirmation />} 
+          <Route
+            path="/confirm-appointment/:appointmentId"
+            element={<AppointmentConfirmation />}
           />
-   
+
           <Route path="/add-client" element={<PublicClientForm />} />
 
           <Route
@@ -54,7 +54,20 @@ const App = () => {
               </PrivateRoute>
             }
           />
-           <Route
+
+          {/* Route for Offline Date Manager */}
+          <Route
+            path="/admin/offline-dates"
+            element={
+              <PrivateRoute role="Admin">
+                <AdminLayout>
+                  <OfflineDateManager />
+                </AdminLayout>
+              </PrivateRoute>
+            }
+          />
+
+          <Route
             path="/therapist"
             element={
               <PrivateRoute role="Therapist">
@@ -83,5 +96,5 @@ const App = () => {
 
 export default App;
 
-// "email": admin@example.com 
+// "email": admin@example.com
 //   "password": securePassword123
