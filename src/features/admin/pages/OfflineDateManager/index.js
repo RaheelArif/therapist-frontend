@@ -120,7 +120,8 @@ function OfflineDateManager() {
 
     return (
       <div className={cellClass}>
-        {cellClass}
+        {cellClass === "offline-date" ? <h1 className="closed-date-calender">Closed</h1> : null}
+        {cellClass === "selected-date" ? "Selected" : null}
         {/* You can add content here if you want */}
       </div>
     );
@@ -141,7 +142,7 @@ function OfflineDateManager() {
 
   return (
     <div className="offline-date-manager">
-      <h2>Manage Clinic Offline Dates</h2>
+      <h2 style={{margin:"0px "}}>Manage Clinic Offline Dates</h2>
 
       {error && <Alert message={`Error: ${error}`} type="error" showIcon />}
       {status === "loading" && <Spin size="large" />}
