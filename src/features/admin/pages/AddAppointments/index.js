@@ -38,6 +38,7 @@ import {
 } from "../../../../store/appointment/appointmentSlice";
 import { useNavigate } from "react-router-dom";
 import AppointmentDetailsModal from "./components/AppointmentDetailsModal";
+import moment from "moment"; // Import Moment.js
 
 const { Text } = Typography;
 const { Option } = Select;
@@ -70,6 +71,11 @@ const AppointmentsPage = () => {
   const [selectedClient, setSelectedClient] = useState(null);
   const [showAppointmentDetails, setShowAppointmentDetails] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
+
+  // Offline dates from your slice
+  const offlineDatesObject = useSelector((state) => state.offlineDates); // Replace with your actual selector path
+  const offlineDates = offlineDatesObject?.offlineDates?.offlineDates || [];
+
   useEffect(() => {
     const initializeAppointments = async () => {
       if (selectedTherapist && status === "idle") {
@@ -145,6 +151,12 @@ const AppointmentsPage = () => {
       // Skip if day is unavailable
       if (availableHours === "unavailable") continue;
 
+      //Check if the current date is an offline date
+      const formattedDate = moment(date).format("YYYY-MM-DD");
+      if (isDateOffline(formattedDate)) {
+        continue; // Skip this date
+      }
+
       if (availableHours) {
         const [startTime, endTime] = availableHours.split("-");
 
@@ -169,8 +181,15 @@ const AppointmentsPage = () => {
     }
     return slots;
   };
+
   const handleSelectEvent = (event) => {
     if (event.type === "available") {
+      // Check if the selected date is an offline date
+      const formattedDate = moment(event.start).format("YYYY-MM-DD");
+      if (isDateOffline(formattedDate)) {
+        message.warning("This date is unavailable.");
+        return;
+      }
       setSelectedSlot({
         start: event.start,
         end: event.end,
@@ -182,10 +201,15 @@ const AppointmentsPage = () => {
     }
   };
 
-  // Inside AppointmentsPage component
-
   const handleSelectSlot = (slotInfo) => {
     const selectedDate = new Date(slotInfo.start);
+    const formattedDate = moment(selectedDate).format("YYYY-MM-DD");
+    // Check if the selected date is an offline date
+    if (isDateOffline(formattedDate)) {
+      message.warning("This date is unavailable.");
+      return;
+    }
+
     const dayNames = [
       "sunday",
       "monday",
@@ -231,6 +255,13 @@ const AppointmentsPage = () => {
     setShowNewAppointmentDialog(true);
   };
 
+  // Function to check if a date is an offline date
+  const isDateOffline = (date) => {
+    return offlineDates.some(
+      (offlineDate) => moment(offlineDate).format("YYYY-MM-DD") === date
+    );
+  };
+
   const customComponents = {
     timeSlotWrapper: ({ children, value }) => (
       <div title={format(value, "h:mm a")} style={{ height: "100%" }}>
@@ -238,6 +269,7 @@ const AppointmentsPage = () => {
       </div>
     ),
   };
+
   const eventStyleGetter = (event) => {
     let className = "";
     let style = {
