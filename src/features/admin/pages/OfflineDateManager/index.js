@@ -67,24 +67,41 @@ function OfflineDateManager() {
   };
 
   const handleSave = () => {
-    // Get all currently selected dates that aren't already in offlineDates
-    const newOfflineDates = selectedDates.filter((selectedDate) => {
-      const isAlreadyOffline = offlineDates.some(
-        (offlineDate) =>
-          moment(offlineDate).format("YYYY-MM-DD") ===
-          selectedDate.format("YYYY-MM-DD")
-      );
-      return !isAlreadyOffline;
-    });
+    // Convert offlineDates to "YYYY-MM-DD" format for comparison
+    const offlineDatesSet = new Set(
+      offlineDates.map((date) => moment(date).format("YYYY-MM-DD"))
+    );
 
-    // Combine existing offline dates with new ones
-    const allOfflineDates = [
-      ...offlineDates, // Keep existing offline dates
-      ...newOfflineDates.map((date) => date.toISOString()), // Add new ones
-    ];
+    // Separate dates to add and remove
+    const { toAdd, toRemove } = selectedDates.reduce(
+      (acc, selectedDate) => {
+        const formattedDate = selectedDate.format("YYYY-MM-DD");
 
-    // Dispatch with all dates combined
-    dispatch(updateOfflineDatesAsync(allOfflineDates));
+        if (offlineDatesSet.has(formattedDate)) {
+          acc.toRemove.push(formattedDate); // Remove if already offline
+        } else {
+          acc.toAdd.push(selectedDate.toISOString()); // Add if not offline
+        }
+
+        return acc;
+      },
+      { toAdd: [], toRemove: [] }
+    );
+
+    // Filter out removed dates from offlineDates
+    const updatedOfflineDates = offlineDates.filter(
+      (offlineDate) =>
+        !toRemove.includes(moment(offlineDate).format("YYYY-MM-DD"))
+    );
+
+    // Add new dates
+    const finalOfflineDates = [...updatedOfflineDates, ...toAdd];
+
+    // Dispatch update action
+    dispatch(updateOfflineDatesAsync(finalOfflineDates));
+
+    // Clear selected dates after saving
+    setSelectedDates([]);
   };
 
   const dateCellRender = (date) => {
@@ -95,7 +112,7 @@ function OfflineDateManager() {
 
     let cellClass = "";
     if (isOffline) {
-      cellClass += " offline-date";
+      cellClass += "offline-date";
     }
     if (isSelected) {
       cellClass += "selected-date";
@@ -128,7 +145,15 @@ function OfflineDateManager() {
 
       {error && <Alert message={`Error: ${error}`} type="error" showIcon />}
       {status === "loading" && <Spin size="large" />}
-
+      {selectedDates.length ? (
+        <Button
+          type="primary"
+          onClick={handleSave}
+          disabled={status === "loading"}
+        >
+          Save Changes
+        </Button>
+      ) : null}
       <Calendar
         dateCellRender={dateCellRender}
         onSelect={handleDateSelect}
@@ -166,13 +191,6 @@ function OfflineDateManager() {
         style={{ width: "100%" }}
         cellClassName={getClassName}
       />
-      <Button
-        type="primary"
-        onClick={handleSave}
-        disabled={status === "loading"}
-      >
-        Save Changes
-      </Button>
     </div>
   );
 }
