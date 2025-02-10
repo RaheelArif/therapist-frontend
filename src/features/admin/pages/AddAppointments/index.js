@@ -36,6 +36,8 @@ import {
   selectAppointmentStatus,
   selectAppointmentError,
 } from "../../../../store/appointment/appointmentSlice";
+import { fetchOfflineDates } from "../../../../store/admin/offlineDatesSlice"; // Import the action
+
 import { useNavigate } from "react-router-dom";
 import AppointmentDetailsModal from "./components/AppointmentDetailsModal";
 import moment from "moment"; // Import Moment.js
@@ -75,6 +77,33 @@ const AppointmentsPage = () => {
   // Offline dates from your slice
   const offlineDatesObject = useSelector((state) => state.offlineDates); // Replace with your actual selector path
   const offlineDates = offlineDatesObject?.offlineDates?.offlineDates || [];
+  const offlineDatesStatus = useSelector((state) => state.offlineDates.status);
+  const offlineDatesError = useSelector((state) => state.offlineDates.error);
+
+  useEffect(() => {
+    const initializeAppointments = async () => {
+      if (selectedTherapist && status === "idle") {
+        try {
+          await dispatch(
+            fetchAppointments({
+              therapistId: selectedTherapist.id,
+            })
+          ).unwrap();
+        } catch (error) {
+          message.error("Failed to load appointments");
+        }
+      }
+    };
+
+    initializeAppointments();
+  }, [selectedTherapist, status, dispatch]);
+
+  // Fetch offline dates when component mounts
+  useEffect(() => {
+    if (offlineDatesStatus === "idle") {
+      dispatch(fetchOfflineDates());
+    }
+  }, [dispatch, offlineDatesStatus]);
 
   useEffect(() => {
     const initializeAppointments = async () => {
