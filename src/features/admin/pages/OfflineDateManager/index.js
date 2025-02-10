@@ -8,6 +8,7 @@ import {
   selectOfflineDatesStatus,
   selectOfflineDatesError,
 } from "../../../../store/admin/offlineDatesSlice";
+import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import moment from "moment";
 
 function OfflineDateManager() {
@@ -104,6 +105,39 @@ function OfflineDateManager() {
     setSelectedDates([]);
   };
 
+  const headerRender = ({ value, onChange }) => {
+    const prevMonth = () => {
+      const newValue = value.clone().subtract(1, "month");
+      onChange(newValue);
+      setSelectedDates([])
+    };
+  
+    const nextMonth = () => {
+      const newValue = value.clone().add(1, "month");
+      
+      onChange(newValue);
+      setSelectedDates([])
+    };
+  
+    return (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          padding: "8px 16px",
+          background: "#f5f5f5",
+          borderRadius: "4px",
+        }}
+      >
+        <Button icon={<LeftOutlined />} onClick={prevMonth} />
+        <Typography.Title level={5} style={{ margin: 0 }}>
+          {value.format("MMMM YYYY")}
+        </Typography.Title>
+        <Button icon={<RightOutlined />} onClick={nextMonth} />
+      </div>
+    );
+  };
   const dateCellRender = (date) => {
     const isOffline = isDateOffline(date);
     const isSelected = selectedDates.some((selectedDate) =>
@@ -159,36 +193,7 @@ function OfflineDateManager() {
         dateCellRender={dateCellRender}
         onSelect={handleDateSelect}
         className="my-calendar"
-        headerRender={({ value, type, onChange, onTypeChange }) => {
-          const start = 0;
-          const end = 12;
-          const monthOptions = [];
-
-          let current = value.clone();
-          const localeData = moment.localeData();
-          const months = localeData.monthsShort();
-
-          for (let index = 0; index < 12; index++) {
-            monthOptions.push({ label: months[index], value: index });
-            current = current.add(1, "month");
-          }
-
-          const years = [];
-          for (let i = start; i < end; i++) {
-            years.push(i);
-          }
-          return (
-            <div
-              style={{
-                padding: 8,
-              }}
-            >
-              <Typography.Title level={5} style={{ margin: 0 }}>
-                {value.format("MMMM YYYY")}
-              </Typography.Title>
-            </div>
-          );
-        }}
+        headerRender={headerRender}
         style={{ width: "100%" }}
         cellClassName={getClassName}
       />
