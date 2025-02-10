@@ -28,23 +28,25 @@ function OfflineDateManager() {
       console.log("No offline dates available");
       return false;
     }
-  
+
     // Log the current date being checked and all offline dates
-  
+
     const isOffline = offlineDates.some((offlineDate) => {
       const offlineDateMoment = moment(offlineDate);
       const offlineDateFormatted = offlineDateMoment.format("YYYY-MM-DD");
       const currentDateFormatted = date.format("YYYY-MM-DD");
-  
+
       const isSame = offlineDateFormatted === currentDateFormatted;
-  
+
       // Only log matches to reduce console noise
       if (isSame) {
-        console.log(`✅ MATCH FOUND: Calendar date ${currentDateFormatted} matches offline date ${offlineDateFormatted}`);
+        console.log(
+          `✅ MATCH FOUND: Calendar date ${currentDateFormatted} matches offline date ${offlineDateFormatted}`
+        );
       }
       return isSame;
     });
-  
+
     return isOffline;
   };
 
@@ -66,19 +68,21 @@ function OfflineDateManager() {
 
   const handleSave = () => {
     // Get all currently selected dates that aren't already in offlineDates
-    const newOfflineDates = selectedDates.filter(selectedDate => {
-      const isAlreadyOffline = offlineDates.some(offlineDate => 
-        moment(offlineDate).format('YYYY-MM-DD') === selectedDate.format('YYYY-MM-DD')
+    const newOfflineDates = selectedDates.filter((selectedDate) => {
+      const isAlreadyOffline = offlineDates.some(
+        (offlineDate) =>
+          moment(offlineDate).format("YYYY-MM-DD") ===
+          selectedDate.format("YYYY-MM-DD")
       );
       return !isAlreadyOffline;
     });
-  
+
     // Combine existing offline dates with new ones
     const allOfflineDates = [
-      ...offlineDates,  // Keep existing offline dates
-      ...newOfflineDates.map(date => date.toISOString())  // Add new ones
+      ...offlineDates, // Keep existing offline dates
+      ...newOfflineDates.map((date) => date.toISOString()), // Add new ones
     ];
-  
+
     // Dispatch with all dates combined
     dispatch(updateOfflineDatesAsync(allOfflineDates));
   };
@@ -99,7 +103,7 @@ function OfflineDateManager() {
 
     return (
       <div className={cellClass}>
-       {cellClass}
+        {cellClass}
         {/* You can add content here if you want */}
       </div>
     );
