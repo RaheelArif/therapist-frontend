@@ -1,12 +1,11 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { login, getProfile } from "../../api/auth";
 
-// Modified loginUser to chain the profile fetch
+// Existing async thunks remain the same
 export const loginUser = createAsyncThunk(
   "auth/login",
   async (credentials, { dispatch }) => {
     const response = await login(credentials);
-    // After successful login, immediately fetch profile
     if (response.access_token) {
       localStorage.setItem("token", response.access_token);
       await dispatch(fetchUserProfile());
@@ -20,6 +19,14 @@ export const fetchUserProfile = createAsyncThunk(
   async () => {
     const response = await getProfile();
     return response;
+  }
+);
+
+// Add new action for updating therapist profile
+export const updateTherapistProfile = createAsyncThunk(
+  "auth/updateTherapistProfile",
+  async ({ therapistId, updatedData }) => {
+    return { therapistId, ...updatedData };
   }
 );
 
@@ -48,6 +55,7 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      // Existing cases remain the same
       .addCase(loginUser.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -55,10 +63,8 @@ const authSlice = createSlice({
       .addCase(loginUser.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isAuthenticated = true;
-        // Basic user info from login
         state.token = action.payload.access_token;
         state.role = action.payload.user.role;
-        // Store in localStorage
         localStorage.setItem("token", action.payload.access_token);
         localStorage.setItem("role", action.payload.user.role);
       })
@@ -73,15 +79,24 @@ const authSlice = createSlice({
       .addCase(fetchUserProfile.fulfilled, (state, action) => {
         state.isLoading = false;
         state.user = action.payload;
-        // Update role in case it's different in full profile
         state.role = action.payload.role;
-        // Store complete user data
         localStorage.setItem("user", JSON.stringify(action.payload));
         localStorage.setItem("role", action.payload.role);
       })
       .addCase(fetchUserProfile.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.error.message;
+      })
+      // Add new case for updating therapist profile
+      .addCase(updateTherapistProfile.fulfilled, (state, action) => {
+        if (state.user?.user?.therapist) {
+          state.user.user.therapist = {
+            ...state.user.user.therapist,
+            ...action.payload
+          };
+          // Update localStorage
+          localStorage.setItem("user", JSON.stringify(state.user));
+        }
       });
   },
 });
