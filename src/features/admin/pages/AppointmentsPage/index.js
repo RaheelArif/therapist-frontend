@@ -23,7 +23,7 @@ import {
 } from "../../../../store/appointment/appointmentSlice";
 import { getClients } from "../../../../api/client";
 import { getTherapists } from "../../../../api/therapist";
-import { format } from "date-fns";
+import { format, differenceInMinutes } from "date-fns"; // Import differenceInMinutes
 import debounce from "lodash/debounce";
 
 const { Option } = Select;
@@ -147,31 +147,42 @@ const AppointmentsPage = () => {
         )}`,
     },
     {
-        title: "Status",
-        dataIndex: "status",
-        key: "status",
-        render: (status, record) => (
-          <Select
-            value={status}
-            style={{ width: 130 }}
-            onChange={(newStatus) => handleStatusChange(record.id, newStatus)}
-            bordered={false}
-          >
-            <Option value="SCHEDULED">
-              <Tag color="processing">SCHEDULED</Tag>
-            </Option>
-            <Option value="COMPLETED">
-              <Tag color="success">COMPLETED</Tag>
-            </Option>
-            <Option value="CANCELED">
-              <Tag color="error">CANCELED</Tag>
-            </Option>
-            <Option value="RESCHEDULED">
-              <Tag color="warning">RESCHEDULED</Tag>
-            </Option>
-          </Select>
-        ),
+      title: "Duration",
+      dataIndex: "startTime",
+      key: "duration",
+      render: (startTime, record) => {
+        const start = new Date(startTime);
+        const end = new Date(record.endTime);
+        const duration = differenceInMinutes(end, start);
+        return <Tag color="black">{`${duration} minutes`}</Tag>;
       },
+    },
+    {
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
+      render: (status, record) => (
+        <Select
+          value={status}
+          style={{ width: 130 }}
+          onChange={(newStatus) => handleStatusChange(record.id, newStatus)}
+          bordered={false}
+        >
+          <Option value="SCHEDULED">
+            <Tag color="processing">SCHEDULED</Tag>
+          </Option>
+          <Option value="COMPLETED">
+            <Tag color="success">COMPLETED</Tag>
+          </Option>
+          <Option value="CANCELED">
+            <Tag color="error">CANCELED</Tag>
+          </Option>
+          <Option value="RESCHEDULED">
+            <Tag color="warning">RESCHEDULED</Tag>
+          </Option>
+        </Select>
+      ),
+    },
     {
       title: "Notes",
       dataIndex: "notes",
@@ -197,14 +208,16 @@ const AppointmentsPage = () => {
   ];
   const handleStatusChange = async (appointmentId, newStatus) => {
     try {
-      await dispatch(updateAppointment({
-        id: appointmentId,
-        data: { status: newStatus }
-      })).unwrap();
+      await dispatch(
+        updateAppointment({
+          id: appointmentId,
+          data: { status: newStatus },
+        })
+      ).unwrap();
       message.success(`Appointment status updated to ${newStatus}`);
       fetchAppointmentData(); // Refresh the list
     } catch (err) {
-      message.error('Failed to update appointment status');
+      message.error("Failed to update appointment status");
     }
   };
   return (
