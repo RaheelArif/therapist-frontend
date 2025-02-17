@@ -98,30 +98,20 @@ const AppointmentsPage = () => {
     initializeAppointments();
   }, [selectedTherapist, status, dispatch]);
 
-  // Fetch offline dates when component mounts
   useEffect(() => {
-    if (offlineDatesStatus === "idle") {
-      dispatch(fetchOfflineDates());
+    // Re-generate slots when either offline dates source changes
+    if (selectedTherapist || offlineDates) {
+      // This will trigger a re-render with updated available slots
+      const slots = generateAvailableSlots();
+      // You might want to store these in state if needed
     }
-  }, [dispatch, offlineDatesStatus]);
-
-  useEffect(() => {
-    const initializeAppointments = async () => {
-      if (selectedTherapist && status === "idle") {
-        try {
-          await dispatch(
-            fetchAppointments({
-              therapistId: selectedTherapist.id,
-            })
-          ).unwrap();
-        } catch (error) {
-          message.error("Failed to load appointments");
-        }
+  }, [selectedTherapist?.offlineDates, offlineDates]);
+    // Fetch offline dates when component mounts
+    useEffect(() => {
+      if (offlineDatesStatus === "idle") {
+        dispatch(fetchOfflineDates());
       }
-    };
-
-    initializeAppointments();
-  }, [selectedTherapist, status, dispatch]);
+    }, [dispatch, offlineDatesStatus]);
 
   const handleCreateAppointment = async (appointmentData) => {
     if (!selectedClient || !appointmentData) return;
@@ -148,16 +138,14 @@ const AppointmentsPage = () => {
 
   const generateAvailableSlots = () => {
     if (!selectedTherapist?.availableHours) return [];
-
+  
     const slots = [];
     const today = new Date();
-    // Set time to start of day to ensure proper comparison
     today.setHours(0, 0, 0, 0);
-
-    // Set end date to last day of next month
+  
     const endDate = new Date();
     endDate.setMonth(endDate.getMonth() + 2, 0);
-
+  
     const dayNames = [
       "sunday",
       "monday",
@@ -167,8 +155,7 @@ const AppointmentsPage = () => {
       "friday",
       "saturday",
     ];
-
-    // Start from today instead of previous month
+  
     for (
       let date = new Date(today);
       date <= endDate;
@@ -176,30 +163,27 @@ const AppointmentsPage = () => {
     ) {
       const dayName = dayNames[date.getDay()];
       const availableHours = selectedTherapist.availableHours[dayName];
-
+  
       // Skip if day is unavailable
       if (availableHours === "unavailable") continue;
-
-      //Check if the current date is an offline date
+  
+      // Check both admin and therapist offline dates
       const formattedDate = moment(date).format("YYYY-MM-DD");
       if (isDateOffline(formattedDate)) {
-        continue; // Skip this date
+        continue; // Skip this date if it's marked as offline by either admin or therapist
       }
-
+  
       if (availableHours) {
         const [startTime, endTime] = availableHours.split("-");
-
-        // Parse hours and minutes
         const [startHour, startMinute] = startTime.split(":").map(Number);
         const [endHour, endMinute] = endTime.split(":").map(Number);
-
-        // Create a single available block for the day
+  
         const dayStart = new Date(date);
         dayStart.setHours(startHour, startMinute, 0, 0);
-
+  
         const dayEnd = new Date(date);
         dayEnd.setHours(endHour, endMinute, 0, 0);
-
+  
         slots.push({
           title: `Available (${startTime} - ${endTime})`,
           start: dayStart,
@@ -233,7 +217,8 @@ const AppointmentsPage = () => {
   const handleSelectSlot = (slotInfo) => {
     const selectedDate = new Date(slotInfo.start);
     const formattedDate = moment(selectedDate).format("YYYY-MM-DD");
-    // Check if the selected date is an offline date
+    
+    // Check both admin and therapist offline dates
     if (isDateOffline(formattedDate)) {
       message.warning("This date is unavailable.");
       return;
@@ -286,9 +271,17 @@ const AppointmentsPage = () => {
 
   // Function to check if a date is an offline date
   const isDateOffline = (date) => {
-    return offlineDates.some(
+    // Check admin-set offline dates
+    const isAdminOffline = offlineDates.some(
       (offlineDate) => moment(offlineDate).format("YYYY-MM-DD") === date
     );
+  
+    // Check therapist's personal offline dates
+    const isTherapistOffline = selectedTherapist?.offlineDates?.some(
+      (offlineDate) => moment(offlineDate).format("YYYY-MM-DD") === date
+    );
+  
+    return isAdminOffline || isTherapistOffline;
   };
 
   const customComponents = {
