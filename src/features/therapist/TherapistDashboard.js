@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Card, Table, Select, Tag, Button, message, Space } from "antd";
+import { Card, Table, Select, Tag, Button, message, Space, Tabs } from "antd"; // Import Tabs
 import { useSelector } from "react-redux";
 import { getAppointments } from "../../api/appointment";
 import ChangeStatusModal from "./components/ChangeStatusModal";
@@ -7,6 +7,7 @@ import AddDocumentsModal from "./components/AddDocumentsModal";
 import ViewNotesModal from "./components/ViewNotesModal";
 import FileViewerModal from "./components/FileViewerModal";
 import ClientDetails from "./components/ClientDetails";
+import TherapistOfflineDateManager from "./components/TherapistOfflineDateManager";
 
 const { Option } = Select;
 
@@ -21,6 +22,7 @@ const TherapistDashboard = () => {
     useState(null);
   const [selectedNoteAppointment, setSelectedNoteAppointment] = useState(null);
   const [selectedFileAppointment, setSelectedFileAppointment] = useState(null);
+
   // Fetch appointments
   useEffect(() => {
     const fetchAppointments = async () => {
@@ -141,56 +143,59 @@ const TherapistDashboard = () => {
         />
       ),
     },
-    // {
-    //   title: "Client Files",
-    //   key: "clientFiles",
-    //   render: (_, record) => {
-    //     if (record.client?.fileUpload && record.client.fileUpload.length > 0) {
-    //       return (
-    //         <Button onClick={() => handleViewFile(record)}>Client Files</Button>
-    //       );
-    //     }
-    //     return "No Client Files";
-    //   },
-    // },
   ];
 
   const filteredAppointments = appointments.filter((apt) =>
     statusFilter === "ALL" ? true : apt.status === statusFilter
   );
 
+  const tabItems = [
+    {
+      key: "appointments",
+      label: "Appointments",
+      children: (
+        <Card
+          title="My Appointments"
+          extra={
+            <Select
+              defaultValue="ALL"
+              style={{ width: 120 }}
+              onChange={setStatusFilter}
+            >
+              <Option value="ALL">All Status</Option>
+              <Option value="SCHEDULED">Scheduled</Option>
+              <Option value="COMPLETED">Completed</Option>
+              <Option value="CANCELED">Canceled</Option>
+              <Option value="RESCHEDULED">Rescheduled</Option>
+            </Select>
+          }
+        >
+          <Table
+            columns={columns}
+            dataSource={filteredAppointments}
+            rowKey="id"
+            loading={loading}
+            pagination={{
+              pageSize: 10,
+              showTotal: (total) => `Total ${total} appointments`,
+            }}
+            scroll={{ x: "max-content" }}
+          />
+        </Card>
+      ),
+    },
+    {
+      key: "offlineDates",
+      label: "Manage Offline Dates",
+      children: <TherapistOfflineDateManager />,
+    },
+  ];
+
   return (
     <div className="p-6">
-      <Card
-        title="My Appointments"
-        extra={
-          <Select
-            defaultValue="ALL"
-            style={{ width: 120 }}
-            onChange={setStatusFilter}
-          >
-            <Option value="ALL">All Status</Option>
-            <Option value="SCHEDULED">Scheduled</Option>
-            <Option value="COMPLETED">Completed</Option>
-            <Option value="CANCELED">CANCELED</Option>
-            <Option value="RESCHEDULED">Rescheduled</Option>
-          </Select>
-        }
-      >
-        <Table
-          columns={columns}
-          dataSource={filteredAppointments}
-          rowKey="id"
-          loading={loading}
-          pagination={{
-            pageSize: 10,
-            showTotal: (total) => `Total ${total} appointments`,
-          }}
-          scroll={{ x: "max-content" }}
-        />
-      </Card>
+      <Tabs items={tabItems} />
 
-      {/* Change Status Modal */}
+      {/* Modals (outside Tabs to avoid unmounting) */}
       {selectedStatusAppointment && (
         <ChangeStatusModal
           appointment={selectedStatusAppointment}
@@ -206,7 +211,6 @@ const TherapistDashboard = () => {
         />
       )}
 
-      {/* Add Documents Modal */}
       {selectedDocumentAppointment && (
         <AddDocumentsModal
           appointment={selectedDocumentAppointment}
@@ -222,7 +226,6 @@ const TherapistDashboard = () => {
         />
       )}
 
-      {/* View Notes Modal */}
       {selectedNoteAppointment && (
         <ViewNotesModal
           appointment={selectedNoteAppointment}
@@ -230,7 +233,6 @@ const TherapistDashboard = () => {
         />
       )}
 
-      {/* File Viewer Modal */}
       {selectedFileAppointment && (
         <FileViewerModal
           appointment={selectedFileAppointment}

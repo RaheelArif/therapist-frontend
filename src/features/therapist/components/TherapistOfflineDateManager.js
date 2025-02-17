@@ -1,38 +1,37 @@
 import React, { useState, useEffect } from "react";
-import { Calendar, Button, Alert, Spin, Typography } from "antd";
+import { Calendar, Button, Alert, Spin, Typography, message } from "antd";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  fetchOfflineDates,
-  updateOfflineDatesAsync,
-  selectOfflineDates,
-  selectOfflineDatesStatus,
-  selectOfflineDatesError,
-} from "../../../../store/admin/offlineDatesSlice";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import moment from "moment";
+import { updateTherapistProfile } from "../../../features/auth/authSlice";
+import { updateTherapist } from "../../../api/therapist";
 
-function OfflineDateManager() {
-  const offlineDatesObject = useSelector(selectOfflineDates) || {}; // Get the object, default to {}
-  const offlineDates = offlineDatesObject.offlineDates || []; // Access the array, default to []
-
-  const status = useSelector(selectOfflineDatesStatus);
-  const error = useSelector(selectOfflineDatesError);
+function TherapistOfflineDateManager() {
+  const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const [selectedDates, setSelectedDates] = useState([]); // Moment objects
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const therapistId = user?.user?.therapist?.id;
+  const initialOfflineDates = user?.user?.therapist?.offlineDates || [];
 
   useEffect(() => {
-    dispatch(fetchOfflineDates());
-  }, [dispatch]);
+    // Initialize selectedDates with the therapist's existing offline dates
+    setSelectedDates(
+      initialOfflineDates.map((date) => moment.utc(date))
+    );
+  }, [initialOfflineDates]);
 
   const isDateOffline = (date) => {
-    if (!offlineDates || !Array.isArray(offlineDates)) {
+    if (!initialOfflineDates || !Array.isArray(initialOfflineDates)) {
       console.log("No offline dates available");
       return false;
     }
 
     // Log the current date being checked and all offline dates
 
-    const isOffline = offlineDates.some((offlineDate) => {
+    const isOffline = initialOfflineDates.some((offlineDate) => {
       const offlineDateMoment = moment(offlineDate);
       const offlineDateFormatted = offlineDateMoment.format("YYYY-MM-DD");
       const currentDateFormatted = date.format("YYYY-MM-DD");
@@ -52,73 +51,65 @@ function OfflineDateManager() {
   };
 
   const handleDateSelect = (date) => {
+    // Handle the selection of a date on the calendar
     const isSelected = selectedDates.some((selectedDate) =>
       selectedDate.isSame(date, "day")
     );
 
     if (isSelected) {
+      // If the date is already selected, remove it from selectedDates
       setSelectedDates(
         selectedDates.filter(
           (selectedDate) => !selectedDate.isSame(date, "day")
         )
       );
     } else {
+      // If the date is not selected, add it to selectedDates
       setSelectedDates([...selectedDates, date]);
     }
   };
 
-  const handleSave = () => {
-    // Convert offlineDates to "YYYY-MM-DD" format for comparison
-    const offlineDatesSet = new Set(
-      offlineDates.map((date) => moment(date).format("YYYY-MM-DD"))
-    );
+  const handleSave = async () => {
+    setLoading(true);
+    setError(null);
 
-    // Separate dates to add and remove
-    const { toAdd, toRemove } = selectedDates.reduce(
-      (acc, selectedDate) => {
-        const formattedDate = selectedDate.format("YYYY-MM-DD");
+    try {
+      // Convert the selected dates to ISO string format
+      const datesToSend = selectedDates.map((date) => date.toISOString());
 
-        if (offlineDatesSet.has(formattedDate)) {
-          acc.toRemove.push(formattedDate); // Remove if already offline
-        } else {
-          acc.toAdd.push(selectedDate.toISOString()); // Add if not offline
-        }
+      // Call the API to update the therapist's offline dates
+      await updateTherapist(therapistId, { offlineDates: datesToSend });
 
-        return acc;
-      },
-      { toAdd: [], toRemove: [] }
-    );
+      // Dispatch the Redux action to update the therapist's profile
+      dispatch(
+        updateTherapistProfile({
+          therapistId: therapistId,
+          updatedData: { offlineDates: datesToSend },
+        })
+      );
 
-    // Filter out removed dates from offlineDates
-    const updatedOfflineDates = offlineDates.filter(
-      (offlineDate) =>
-        !toRemove.includes(moment(offlineDate).format("YYYY-MM-DD"))
-    );
-
-    // Add new dates
-    const finalOfflineDates = [...updatedOfflineDates, ...toAdd];
-
-    // Dispatch update action
-    dispatch(updateOfflineDatesAsync(finalOfflineDates));
-
-    // Clear selected dates after saving
-    setSelectedDates([]);
+      message.success("Offline dates updated successfully!");
+    } catch (err) {
+      console.error("Error updating offline dates:", err);
+      setError("Failed to update offline dates. Please try again.");
+      message.error("Failed to update offline dates.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const headerRender = ({ value, onChange }) => {
+    // Render the header of the calendar with navigation buttons
     const prevMonth = () => {
       const newValue = value.clone().subtract(1, "month");
       onChange(newValue);
-      setSelectedDates([])
     };
-  
+
     const nextMonth = () => {
       const newValue = value.clone().add(1, "month");
-      
       onChange(newValue);
-      setSelectedDates([])
     };
-  
+
     return (
       <div
         style={{
@@ -138,13 +129,15 @@ function OfflineDateManager() {
       </div>
     );
   };
+
   const dateCellRender = (date) => {
-    console.log(date )
+
 
     const isOffline = isDateOffline(date);
     const isSelected = selectedDates.some((selectedDate) =>
       selectedDate.isSame(date, "day")
     );
+    console.log(isOffline)
 
     let cellClass = "";
     if (isOffline) {
@@ -163,44 +156,31 @@ function OfflineDateManager() {
     );
   };
 
-  const getClassName = (date) => {
-    const isOffline = isDateOffline(date);
-    const isSelected = selectedDates.some((selectedDate) =>
-      selectedDate.isSame(date, "day")
-    );
-    if (isOffline) {
-      return "offline-date";
-    }
-    if (isSelected) {
-      return "selected-date";
-    }
-  };
-
   return (
     <div className="offline-date-manager">
-      <h2 style={{margin:"0px "}}>Manage Clinic Offline Dates</h2>
+    
 
       {error && <Alert message={`Error: ${error}`} type="error" showIcon />}
-      {status === "loading" && <Spin size="large" />}
+      {loading && <Spin size="large" />}
       {selectedDates.length ? (
-        <Button
-          type="primary"
-          onClick={handleSave}
-          disabled={status === "loading"}
-        >
-          Save Changes
-        </Button>
-      ) : null}
+      <Button
+        type="primary"
+        onClick={handleSave}
+        disabled={loading}
+      >
+        Save Changes
+      </Button>): null}
+
       <Calendar
         dateCellRender={dateCellRender}
         onSelect={handleDateSelect}
         className="my-calendar"
         headerRender={headerRender}
         style={{ width: "100%" }}
-        cellClassName={getClassName}
+
       />
     </div>
   );
 }
 
-export default OfflineDateManager;
+export default TherapistOfflineDateManager;
