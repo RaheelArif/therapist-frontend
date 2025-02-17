@@ -41,9 +41,7 @@ function OfflineDateManager() {
 
       // Only log matches to reduce console noise
       if (isSame) {
-        console.log(
-          `✅ MATCH FOUND: Calendar date ${currentDateFormatted} matches offline date ${offlineDateFormatted}`
-        );
+   
       }
       return isSame;
     });
@@ -139,7 +137,6 @@ function OfflineDateManager() {
     );
   };
   const dateCellRender = (date) => {
-    console.log(date )
 
     const isOffline = isDateOffline(date);
     const isSelected = selectedDates.some((selectedDate) =>
@@ -148,6 +145,7 @@ function OfflineDateManager() {
 
     let cellClass = "";
     if (isOffline) {
+
       cellClass += "offline-date";
     }
     if (isSelected) {
