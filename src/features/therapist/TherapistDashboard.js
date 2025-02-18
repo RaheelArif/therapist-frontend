@@ -1,5 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { Card, Table, Select, Tag, Button, message, Space, Tabs } from "antd"; // Import Tabs
+import {
+  Card,
+  Table,
+  Select,
+  Tag,
+  Button,
+  message,
+  Space,
+  Tabs,
+  Input,
+} from "antd"; // Import Input
 import { useSelector } from "react-redux";
 import { getAppointments } from "../../api/appointment";
 import ChangeStatusModal from "./components/ChangeStatusModal";
@@ -14,6 +24,7 @@ const { Option } = Select;
 const TherapistDashboard = () => {
   const { user } = useSelector((state) => state.auth);
   const [statusFilter, setStatusFilter] = useState("ALL");
+  const [clientNameFilter, setClientNameFilter] = useState(""); // New state for client name filter
   const [loading, setLoading] = useState(false);
   const [appointments, setAppointments] = useState([]);
   const [selectedStatusAppointment, setSelectedStatusAppointment] =
@@ -145,9 +156,15 @@ const TherapistDashboard = () => {
     },
   ];
 
-  const filteredAppointments = appointments.filter((apt) =>
-    statusFilter === "ALL" ? true : apt.status === statusFilter
-  );
+  const filteredAppointments = appointments.filter((apt) => {
+    const statusMatch =
+      statusFilter === "ALL" ? true : apt.status === statusFilter;
+    const clientNameMatch = apt.client?.user?.fullname
+      ?.toLowerCase()
+      .includes(clientNameFilter.toLowerCase());
+
+    return statusMatch && clientNameMatch;
+  });
 
   const tabItems = [
     {
@@ -157,17 +174,24 @@ const TherapistDashboard = () => {
         <Card
           title="My Appointments"
           extra={
-            <Select
-              defaultValue="ALL"
-              style={{ width: 120 }}
-              onChange={setStatusFilter}
-            >
-              <Option value="ALL">All Status</Option>
-              <Option value="SCHEDULED">Scheduled</Option>
-              <Option value="COMPLETED">Completed</Option>
-              <Option value="CANCELED">Canceled</Option>
-              <Option value="RESCHEDULED">Rescheduled</Option>
-            </Select>
+            <Space>
+              <Select
+                defaultValue="ALL"
+                style={{ width: 120 }}
+                onChange={setStatusFilter}
+              >
+                <Option value="ALL">All Status</Option>
+                <Option value="SCHEDULED">Scheduled</Option>
+                <Option value="COMPLETED">Completed</Option>
+                <Option value="CANCELED">Canceled</Option>
+                <Option value="RESCHEDULED">Rescheduled</Option>
+              </Select>
+              <Input
+                placeholder="Filter by Client Name"
+                style={{ width: 200 }}
+                onChange={(e) => setClientNameFilter(e.target.value)}
+              />
+            </Space>
           }
         >
           <Table
