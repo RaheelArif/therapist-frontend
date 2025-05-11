@@ -13,7 +13,7 @@ import logo from "../../../assets/images/logo-ms.png";
 const { Sider } = Layout;
 const { Text } = Typography;
 
-const AdminSidebar = () => {
+const AdminSidebar = ({ onNavigate }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useSelector((state) => state.auth);
@@ -84,7 +84,10 @@ const AdminSidebar = () => {
       <Menu
         mode="inline"
         items={items}
-        onClick={({ key }) => navigate(key)}
+        onClick={({ key }) => {
+          navigate(key);
+          if (onNavigate) onNavigate(); // Close drawer if mobile
+        }}
         selectedKeys={getSelectedKey()}
       />
     </Sider>

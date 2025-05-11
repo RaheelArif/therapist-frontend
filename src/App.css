@@ -344,10 +344,10 @@
   max-height: 150px;
   overflow-y: auto;
 }
-.my-calendar{
+.my-calendar {
 }
 .offline-date-manager {
-  padding:0px  20px;
+  padding: 0px 20px;
 }
 
 .my-calendar .offline-date {
@@ -377,13 +377,18 @@
   border-radius: 5px;
 }
 
- /* Highlight current select date */
+/* Highlight current select date */
 .ant-calendar-selected-date .ant-calendar-date,
 .ant-calendar-selected-day .ant-calendar-date {
   background: #90ee90; /* Light green */
 }
+
+.admin-layout-content-area {
+  background-color: #efefef00;
+  padding: 20px 40px;
+}
 /* Responsive */
-@media (max-width: 576px) {
+@media (max-width: 768px) {
   .appointment-modal {
     max-width: 95vw !important;
   }
@@ -396,5 +401,14 @@
 
   .therapist-details {
     flex-direction: column;
+  }
+  .admin-layout-content-area {
+    padding: 10px 20px;
+    height: 100%;
+  }
+  .custom-title-c{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
 }

@@ -21,6 +21,7 @@ import {
   addAdmin,
   removeAdmin,
 } from "../../../../store/admin/adminSlice";
+import useResponsive from "../../../../hooks/useResponsive";
 const AdminsPage = () => {
   const dispatch = useDispatch();
   const { admins, total, currentPage, pageSize, loading } = useSelector(
@@ -30,6 +31,7 @@ const AdminsPage = () => {
   const [search, setSearch] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
   const [form] = Form.useForm();
+  const isMobile = useResponsive();
 
   useEffect(() => {
     dispatch(fetchAdmins({ fullname: search, page: currentPage, pageSize }));
@@ -74,7 +76,7 @@ const AdminsPage = () => {
       key: "actions",
       render: (_, record) => (
         <Space>
-          <Button icon={<EditOutlined />}  />
+          <Button icon={<EditOutlined />} />
           <Popconfirm
             title="Are you sure you want to delete this client?"
             onConfirm={() => handleDelete(record.id)}
@@ -99,15 +101,8 @@ const AdminsPage = () => {
 
   return (
     <div>
-      <div
-        style={{
-          marginBottom: 16,
-          display: "flex",
-          justifyContent: "space-between",
-        }}
-      >
-        <h2>Admins Management</h2>
-        <Space>
+      <div className="mb-6 custom-title-c  admin-bx flex justify-between items-center">
+        <Space style={{display:'flex' , justifyContent:"space-between" , width:"100%" , margin:"10px  0px"}}>
           <Input
             placeholder="Search by name"
             value={search}
@@ -119,7 +114,7 @@ const AdminsPage = () => {
             icon={<PlusOutlined />}
             onClick={() => setModalVisible(true)}
           >
-            Add New Admin
+            Admin
           </Button>
         </Space>
       </div>
@@ -136,6 +131,7 @@ const AdminsPage = () => {
         }}
         loading={loading}
         onChange={handleTableChange}
+        scroll={isMobile ? { x: "max-content" } : undefined}
       />
 
       <Modal

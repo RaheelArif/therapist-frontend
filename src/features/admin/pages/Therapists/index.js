@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Table, Button, Space, Modal, message, Popconfirm, Tag } from "antd"; // Import Tag
+import { Table, Button, Space, Modal, message, Popconfirm, Tag } from "antd";
 import {
   EditOutlined,
   DeleteOutlined,
@@ -18,8 +18,8 @@ import {
   selectTherapistError,
 } from "../../../../store/therapist/therapistSlice";
 import { resetAppointmentState } from "../../../../store/appointment/appointmentSlice";
-
 import { useNavigate } from "react-router-dom";
+import useResponsive from "../../../../hooks/useResponsive"; // <--- IMPORT THE HOOK (adjust path)
 
 const TherapistsPage = () => {
   const dispatch = useDispatch();
@@ -29,6 +29,9 @@ const TherapistsPage = () => {
   const pagination = useSelector(selectTherapistPagination);
   const error = useSelector(selectTherapistError);
   const [modalVisible, setModalVisible] = useState(false);
+
+  const isMobile = useResponsive(); // <--- USE THE HOOK (default breakpoint 768px)
+  // const isMobile = useResponsive(992); // Example: for screens smaller than lg
 
   useEffect(() => {
     if (status === "idle") {
@@ -84,17 +87,23 @@ const TherapistsPage = () => {
       title: "Name",
       dataIndex: ["user", "fullname"],
       key: "fullName",
+      // Optional: if you want a fixed width for some columns
+      // width: 150,
+      // Optional: if you want the name column to be fixed while scrolling
+      // fixed: isMobile ? undefined : 'left', // Only fix on non-mobile if desired
     },
     {
       title: "Bio",
       dataIndex: "bio",
       key: "bio",
+      // width: 200,
     },
     {
       title: "Experience",
       dataIndex: "experience",
       key: "experience",
       render: (exp) => `${exp} years`,
+      // width: 120,
     },
     {
       title: "Status",
@@ -105,10 +114,13 @@ const TherapistsPage = () => {
           {isOnline ? "Online" : "Offline"}
         </Tag>
       ),
+      // width: 100,
     },
     {
       title: "Actions",
       key: "actions",
+      // width: 200, // Give actions column enough space
+      // fixed: isMobile ? undefined : 'right', // Fix actions column on desktop
       render: (_, record) => (
         <Space>
           <Popconfirm
@@ -119,12 +131,11 @@ const TherapistsPage = () => {
           >
             <Button danger icon={<DeleteOutlined />} />
           </Popconfirm>
-
           <Button
             type="primary"
             icon={<CalendarOutlined />}
             onClick={() => handleSetAppointment(record)}
-            disabled={record.isOnline ? false : true}
+            disabled={!record.isOnline} // Simplified a bit
           >
             Set Appointment
           </Button>
@@ -135,8 +146,8 @@ const TherapistsPage = () => {
 
   return (
     <div className="p-6">
-      <div className="mb-6 flex justify-between items-center">
-        <h2 className="text-2xl font-semibold">Therapists Management</h2>
+      <div className="mb-6  custom-title-c flex justify-between items-center">
+        <h2 className="text-2xl font-semibold">Therapists</h2>
         <Button
           type="primary"
           icon={<PlusOutlined />}
@@ -160,6 +171,7 @@ const TherapistsPage = () => {
         }}
         loading={status === "loading"}
         onChange={handleTableChange}
+        scroll={isMobile ? { x: "max-content" } : undefined}
       />
 
       <Modal

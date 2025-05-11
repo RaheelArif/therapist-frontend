@@ -13,6 +13,7 @@ import {
   selectClientPagination,
   selectClientError,
 } from "../../../../store/client/clientSlice";
+import useResponsive from "../../../../hooks/useResponsive";
 
 const ClientsPage = () => {
   const dispatch = useDispatch();
@@ -22,7 +23,7 @@ const ClientsPage = () => {
   const error = useSelector(selectClientError);
   const [modalVisible, setModalVisible] = useState(false);
   const [editingClient, setEditingClient] = useState(null);
-
+  const isMobile = useResponsive();
   useEffect(() => {
     if (status === "idle") {
       dispatch(fetchClients({ page: 1, pageSize: 10 }));
@@ -125,12 +126,12 @@ const ClientsPage = () => {
 
   return (
     <div className="p-6">
-      <div className="mb-6 flex justify-between items-center">
+      <div className="mb-6 custom-title-c flex justify-between items-center">
         <h2
           onClick={() => console.log(clients)}
           className="text-2xl font-semibold"
         >
-          Clients Management
+          Clients
         </h2>
         <Button
           type="primary"
@@ -153,6 +154,8 @@ const ClientsPage = () => {
         }}
         loading={status === "loading"}
         onChange={handleTableChange}
+        scroll={isMobile ? { x: "max-content" } : undefined}
+
       />
 
       <Modal
@@ -164,7 +167,7 @@ const ClientsPage = () => {
       >
         <ClientForm
           onFinish={editingClient ? handleEditSubmit : handleAddClient}
-          initialValues={editingClient} // Pass editing client to the form 
+          initialValues={editingClient} // Pass editing client to the form
           loading={status === "loading"}
         />
       </Modal>

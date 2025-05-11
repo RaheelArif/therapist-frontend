@@ -82,7 +82,7 @@ const DashboardPage = () => {
       <Spin spinning={loading}>
         <Row gutter={[24, 24]}>
           {cards.map((card, index) => (
-            <Col key={index} xs={24} sm={12} lg={6}>
+            <Col key={index} xs={12} sm={12} lg={6}>
               <Card
                 hoverable
                 className={`h-full transform transition-all duration-300 hover:scale-105 hover:shadow-lg`}
