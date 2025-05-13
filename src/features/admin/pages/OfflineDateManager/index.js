@@ -10,11 +10,12 @@ import {
 } from "../../../../store/admin/offlineDatesSlice";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import moment from "moment";
+import useResponsive from "../../../../hooks/useResponsive";
 
 function OfflineDateManager() {
   const offlineDatesObject = useSelector(selectOfflineDates) || {}; // Get the object, default to {}
   const offlineDates = offlineDatesObject.offlineDates || []; // Access the array, default to []
-
+  const isMobile = useResponsive();
   const status = useSelector(selectOfflineDatesStatus);
   const error = useSelector(selectOfflineDatesError);
   const dispatch = useDispatch();
@@ -41,7 +42,6 @@ function OfflineDateManager() {
 
       // Only log matches to reduce console noise
       if (isSame) {
-   
       }
       return isSame;
     });
@@ -107,16 +107,16 @@ function OfflineDateManager() {
     const prevMonth = () => {
       const newValue = value.clone().subtract(1, "month");
       onChange(newValue);
-      setSelectedDates([])
+      setSelectedDates([]);
     };
-  
+
     const nextMonth = () => {
       const newValue = value.clone().add(1, "month");
-      
+
       onChange(newValue);
-      setSelectedDates([])
+      setSelectedDates([]);
     };
-  
+
     return (
       <div
         style={{
@@ -137,7 +137,6 @@ function OfflineDateManager() {
     );
   };
   const dateCellRender = (date) => {
-
     const isOffline = isDateOffline(date);
     const isSelected = selectedDates.some((selectedDate) =>
       selectedDate.isSame(date, "day")
@@ -145,7 +144,6 @@ function OfflineDateManager() {
 
     let cellClass = "";
     if (isOffline) {
-
       cellClass += "offline-date";
     }
     if (isSelected) {
@@ -153,9 +151,15 @@ function OfflineDateManager() {
     }
 
     return (
-      <div className={cellClass}>
-        {cellClass === "offline-date" ? <h1 className="closed-date-calender">Closed</h1> : null}
-        {cellClass === "selected-date" ? "Selected" : null}
+      <div className={`${cellClass} date-cell-c11`}>
+        {isMobile ? null : (
+          <>
+            {cellClass === "offline-date" ? (
+              <h1 className="closed-date-calender">Closed</h1>
+            ) : null}
+            {cellClass === "selected-date" ? "Selected" : null}
+          </>
+        )}
         {/* You can add content here if you want */}
       </div>
     );
@@ -176,7 +180,7 @@ function OfflineDateManager() {
 
   return (
     <div className="offline-date-manager">
-      <h2 style={{margin:"0px "}}>Manage Clinic Offline Dates</h2>
+      <h2 style={{ margin: "0px " }}>Manage Clinic Offline Dates</h2>
 
       {error && <Alert message={`Error: ${error}`} type="error" showIcon />}
       {status === "loading" && <Spin size="large" />}

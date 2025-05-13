@@ -41,6 +41,7 @@ import { fetchOfflineDates } from "../../../../store/admin/offlineDatesSlice"; /
 import { useNavigate } from "react-router-dom";
 import AppointmentDetailsModal from "./components/AppointmentDetailsModal";
 import moment from "moment"; // Import Moment.js
+import useResponsive from "../../../../hooks/useResponsive";
 
 const { Text } = Typography;
 const { Option } = Select;
@@ -66,6 +67,7 @@ const AppointmentsPage = () => {
   const appointments = useSelector(selectAppointments);
   const status = useSelector(selectAppointmentStatus);
   const error = useSelector(selectAppointmentError);
+  const isMobile = useResponsive();
 
   const [showNewAppointmentDialog, setShowNewAppointmentDialog] =
     useState(false);
@@ -295,9 +297,9 @@ const AppointmentsPage = () => {
   const eventStyleGetter = (event) => {
     let className = "";
     let style = {
-      borderRadius: "6px",
+      borderRadius: "0px",
       padding: "4px 8px",
-      fontSize: "0.9em",
+      fontSize: "0", // Hide text by setting font size to 0
       border: "none", // Removed borders for cleaner look
       fontWeight: "500",
     };
@@ -305,18 +307,18 @@ const AppointmentsPage = () => {
     if (event.type === "available") {
       className = "available-slot";
       style.backgroundColor = "#52c41a"; // Solid green
-      style.color = "white";
+      style.color = "transparent";
       style.opacity = 0.9;
     } else if (event.type === "appointment") {
       className = "booked-slot";
       style.backgroundColor = "#1890ff"; // Solid blue
-      style.color = "white";
+      style.color = "transparent";
       style.opacity = 0.9;
     }
 
     if (event.status === "CANCELED") {
       style.backgroundColor = "#ff4d4f"; // Solid red
-      style.color = "white";
+      style.color = "transparent";
       style.opacity = 0.9;
     }
 
@@ -506,3 +508,7 @@ const AppointmentsPage = () => {
 };
 
 export default AppointmentsPage;
+
+
+
+

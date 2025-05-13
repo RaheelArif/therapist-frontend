@@ -135,7 +135,10 @@
   }
   
   .booked-slot:hover {
-    background-color: #096dd9 !important;
+    background-color: #0857ac !important;
+    transform: scale(1.1);
+    transition: 0.4s;
+    cursor: pointer;
   }
   
   /* Selection */

@@ -10,6 +10,7 @@ import {
   Popconfirm,
   message,
   Spin,
+  Typography,
 } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import { DeleteOutlined, UserOutlined } from "@ant-design/icons";
@@ -25,6 +26,7 @@ import { getClients } from "../../../../api/client";
 import { getTherapists } from "../../../../api/therapist";
 import { format, differenceInMinutes } from "date-fns"; // Import differenceInMinutes
 import debounce from "lodash/debounce";
+import useResponsive from "../../../../hooks/useResponsive";
 
 const { Option } = Select;
 
@@ -41,6 +43,7 @@ const AppointmentsPage = () => {
   const [therapistOptions, setTherapistOptions] = useState([]);
   const [clientSearchLoading, setClientSearchLoading] = useState(false);
   const [therapistSearchLoading, setTherapistSearchLoading] = useState(false);
+  const isMobile = useResponsive();
 
   useEffect(() => {
     if (error) {
@@ -124,17 +127,20 @@ const AppointmentsPage = () => {
       title: "Client",
       dataIndex: ["client", "user", "fullname"],
       key: "clientName",
+      width: "120px",
     },
     {
       title: "Therapist",
       dataIndex: ["therapist", "user", "fullname"],
       key: "therapistName",
+      width: "150px",
     },
     {
       title: "Date",
       dataIndex: "startTime",
       key: "date",
       render: (text) => format(new Date(text), "MMM dd, yyyy"),
+      width: "150px",
     },
     {
       title: "Time",
@@ -145,6 +151,7 @@ const AppointmentsPage = () => {
           new Date(record.endTime),
           "h:mm a"
         )}`,
+      width: "100px",
     },
     {
       title: "Duration",
@@ -156,6 +163,7 @@ const AppointmentsPage = () => {
         const duration = differenceInMinutes(end, start);
         return <Tag color="black">{`${duration} minutes`}</Tag>;
       },
+      width: "100px",
     },
     {
       title: "Status",
@@ -182,12 +190,32 @@ const AppointmentsPage = () => {
           </Option>
         </Select>
       ),
+      width: "150px",
     },
     {
       title: "Notes",
       dataIndex: "notes",
       key: "notes",
-      ellipsis: true,
+      width: 150, // Keep the width to constrain the text
+      // Remove the basic 'ellipsis: true' as we are using a custom render for advanced ellipsis
+      render: (text) => {
+        if (!text) { // Handle cases where notes might be null or empty
+          return null;
+        }
+        return (
+          <Typography.Text
+            style={{ width: '100%' }} // Important: Typography.Text needs a width constraint to know when to clamp
+            ellipsis={{
+              rows: 3,
+              expandable: true, // Allows user to expand to see full text
+              // symbol: 'more', // Optional: customize the expand symbol/text
+              tooltip: text     // Optional: shows a tooltip with the full text on hover when truncated
+            }}
+          >
+            {text}
+          </Typography.Text>
+        );
+      },
     },
     {
       title: "Actions",
@@ -222,86 +250,85 @@ const AppointmentsPage = () => {
   };
   return (
     <div className="p-6">
-      <Card title="Appointments List">
-        <div className="mb-6 flex gap-4">
-          {/* Client Filter */}
-          <Select
-            showSearch
-            placeholder="Search Client"
-            style={{ width: 250 }}
-            value={selectedClient?.id}
-            onChange={(value) => {
-              const client = clientOptions.find((c) => c.id === value);
-              setSelectedClient(client);
-            }}
-            onSearch={debouncedClientSearch}
-            loading={clientSearchLoading}
-            filterOption={false}
-            allowClear
-            onClear={() => setSelectedClient(null)}
-            notFoundContent={clientSearchLoading ? <Spin size="small" /> : null}
-          >
-            {clientOptions.map((client) => (
-              <Option key={client.id} value={client.id}>
-                <div className="flex items-center gap-2">
-                  <UserOutlined />
-                  <span>{client.user.fullname}</span>
-                </div>
-              </Option>
-            ))}
-          </Select>
+      <div className="mb-6 search-bx-ap flex gap-4">
+        {/* Client Filter */}
+        <Select
+          showSearch
+          placeholder="Search Client"
+          style={{ width: 250 }}
+          value={selectedClient?.id}
+          onChange={(value) => {
+            const client = clientOptions.find((c) => c.id === value);
+            setSelectedClient(client);
+          }}
+          onSearch={debouncedClientSearch}
+          loading={clientSearchLoading}
+          filterOption={false}
+          allowClear
+          onClear={() => setSelectedClient(null)}
+          notFoundContent={clientSearchLoading ? <Spin size="small" /> : null}
+        >
+          {clientOptions.map((client) => (
+            <Option key={client.id} value={client.id}>
+              <div className="flex items-center gap-2">
+                <UserOutlined />
+                <span>{client.user.fullname}</span>
+              </div>
+            </Option>
+          ))}
+        </Select>
 
-          {/* Therapist Filter */}
-          <Select
-            showSearch
-            placeholder="Search Therapist"
-            style={{ width: 250 }}
-            value={selectedTherapist?.id}
-            onChange={(value) => {
-              const therapist = therapistOptions.find((t) => t.id === value);
-              setSelectedTherapist(therapist);
-            }}
-            onSearch={debouncedTherapistSearch}
-            loading={therapistSearchLoading}
-            filterOption={false}
-            allowClear
-            onClear={() => setSelectedTherapist(null)}
-            notFoundContent={
-              therapistSearchLoading ? <Spin size="small" /> : null
-            }
-          >
-            {therapistOptions?.map((therapist) => (
-              <Option key={therapist.id} value={therapist.id}>
-                <div className="flex items-center gap-2">
-                  <UserOutlined />
-                  <span>{therapist.user.fullname}</span>
-                </div>
-              </Option>
-            ))}
-          </Select>
+        {/* Therapist Filter */}
+        <Select
+          showSearch
+          placeholder="Search Therapist"
+          style={{ width: 250 , margin:"0px 10px" }}
+          value={selectedTherapist?.id}
+          onChange={(value) => {
+            const therapist = therapistOptions.find((t) => t.id === value);
+            setSelectedTherapist(therapist);
+          }}
+          onSearch={debouncedTherapistSearch}
+          loading={therapistSearchLoading}
+          filterOption={false}
+          allowClear
+          onClear={() => setSelectedTherapist(null)}
+          notFoundContent={
+            therapistSearchLoading ? <Spin size="small" /> : null
+          }
+        >
+          {therapistOptions?.map((therapist) => (
+            <Option key={therapist.id} value={therapist.id}>
+              <div className="flex items-center gap-2">
+                <UserOutlined />
+                <span>{therapist.user.fullname}</span>
+              </div>
+            </Option>
+          ))}
+        </Select>
 
-          {/* Status Filter */}
-          <Select
-            placeholder="Filter by status"
-            style={{ width: 200 }}
-            value={statusFilter}
-            onChange={setStatusFilter}
-            allowClear
-          >
-            <Option value="SCHEDULED">Scheduled</Option>
-            <Option value="COMPLETED">Completed</Option>
-            <Option value="CANCELED">CANCELED</Option>
-            <Option value="RESCHEDULED">Rescheduled</Option>
-          </Select>
-        </div>
+        {/* Status Filter */}
+        <Select
+          placeholder="Filter by status"
+          style={{ width: 200 }}
+          value={statusFilter}
+          onChange={setStatusFilter}
+          allowClear
+        >
+          <Option value="SCHEDULED">Scheduled</Option>
+          <Option value="COMPLETED">Completed</Option>
+          <Option value="CANCELED">CANCELED</Option>
+          <Option value="RESCHEDULED">Rescheduled</Option>
+        </Select>
+      </div>
 
-        <Table
-          columns={columns}
-          dataSource={appointments}
-          rowKey="id"
-          loading={status === "loading"}
-        />
-      </Card>
+      <Table
+        columns={columns}
+        dataSource={appointments}
+        rowKey="id"
+        loading={status === "loading"}
+        scroll={isMobile ? { x: "max-content" } : undefined}
+      />
     </div>
   );
 };
