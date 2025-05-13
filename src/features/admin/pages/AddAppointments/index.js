@@ -108,12 +108,12 @@ const AppointmentsPage = () => {
       // You might want to store these in state if needed
     }
   }, [selectedTherapist?.offlineDates, offlineDates]);
-    // Fetch offline dates when component mounts
-    useEffect(() => {
-      if (offlineDatesStatus === "idle") {
-        dispatch(fetchOfflineDates());
-      }
-    }, [dispatch, offlineDatesStatus]);
+  // Fetch offline dates when component mounts
+  useEffect(() => {
+    if (offlineDatesStatus === "idle") {
+      dispatch(fetchOfflineDates());
+    }
+  }, [dispatch, offlineDatesStatus]);
 
   const handleCreateAppointment = async (appointmentData) => {
     if (!selectedClient || !appointmentData) return;
@@ -140,14 +140,14 @@ const AppointmentsPage = () => {
 
   const generateAvailableSlots = () => {
     if (!selectedTherapist?.availableHours) return [];
-  
+
     const slots = [];
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-  
+
     const endDate = new Date();
     endDate.setMonth(endDate.getMonth() + 2, 0);
-  
+
     const dayNames = [
       "sunday",
       "monday",
@@ -157,7 +157,7 @@ const AppointmentsPage = () => {
       "friday",
       "saturday",
     ];
-  
+
     for (
       let date = new Date(today);
       date <= endDate;
@@ -165,27 +165,27 @@ const AppointmentsPage = () => {
     ) {
       const dayName = dayNames[date.getDay()];
       const availableHours = selectedTherapist.availableHours[dayName];
-  
+
       // Skip if day is unavailable
       if (availableHours === "unavailable") continue;
-  
+
       // Check both admin and therapist offline dates
       const formattedDate = moment(date).format("YYYY-MM-DD");
       if (isDateOffline(formattedDate)) {
         continue; // Skip this date if it's marked as offline by either admin or therapist
       }
-  
+
       if (availableHours) {
         const [startTime, endTime] = availableHours.split("-");
         const [startHour, startMinute] = startTime.split(":").map(Number);
         const [endHour, endMinute] = endTime.split(":").map(Number);
-  
+
         const dayStart = new Date(date);
         dayStart.setHours(startHour, startMinute, 0, 0);
-  
+
         const dayEnd = new Date(date);
         dayEnd.setHours(endHour, endMinute, 0, 0);
-  
+
         slots.push({
           title: `Available (${startTime} - ${endTime})`,
           start: dayStart,
@@ -219,7 +219,7 @@ const AppointmentsPage = () => {
   const handleSelectSlot = (slotInfo) => {
     const selectedDate = new Date(slotInfo.start);
     const formattedDate = moment(selectedDate).format("YYYY-MM-DD");
-    
+
     // Check both admin and therapist offline dates
     if (isDateOffline(formattedDate)) {
       message.warning("This date is unavailable.");
@@ -277,12 +277,12 @@ const AppointmentsPage = () => {
     const isAdminOffline = offlineDates.some(
       (offlineDate) => moment(offlineDate).format("YYYY-MM-DD") === date
     );
-  
+
     // Check therapist's personal offline dates
     const isTherapistOffline = selectedTherapist?.offlineDates?.some(
       (offlineDate) => moment(offlineDate).format("YYYY-MM-DD") === date
     );
-  
+
     return isAdminOffline || isTherapistOffline;
   };
 
@@ -375,7 +375,60 @@ const AppointmentsPage = () => {
       </div>
     );
   }
+  const calendarFormats = {
+    timeGutterFormat: (date, culture, localizer) =>
+      localizer.format(date, "h a", culture),
 
+    eventTimeRangeFormat: ({ start, end }, culture, localizer) =>
+      `${localizer.format(start, "h:mm a", culture)} - ${localizer.format(
+        end,
+        "h:mm a",
+        culture
+      )}`,
+
+    selectRangeFormat: ({ start, end }, culture, localizer) =>
+      `${localizer.format(start, "h:mm a", culture)} - ${localizer.format(
+        end,
+        "h:mm a",
+        culture
+      )}`,
+
+    dayRangeHeaderFormat: ({ start, end }, culture, localizer) =>
+      `${localizer.format(start, "MMMM dd, yyyy")} – ${localizer.format(
+        end,
+        "dd, yyyy"
+      )}`,
+
+    // New custom format for day headers in mobile view
+    dayFormat: (date, culture, localizer) => {
+      if (isMobile) {
+        // Mobile: Just show the date number without day name
+        return localizer.format(date, "d", culture);
+      } else {
+        // Desktop: Show date and day name
+        return `${localizer.format(date, "d")} ${localizer.format(
+          date,
+          "EEE",
+          culture
+        )}`;
+      }
+    },
+
+    // New custom format for header cells
+    dayHeaderFormat: (date, culture, localizer) => {
+      if (isMobile) {
+        // Mobile: Just the date number
+        return localizer.format(date, "d", culture);
+      } else {
+        // Desktop: Show date and day name
+        return `${localizer.format(date, "d")} ${localizer.format(
+          date,
+          "EEE",
+          culture
+        )}`;
+      }
+    },
+  };
   return (
     <div className="p-6">
       <Card title="Appointments Management">
@@ -437,28 +490,7 @@ const AppointmentsPage = () => {
           timeslots={4}
           selectable={true}
           longPressThreshold={10}
-          formats={{
-            timeGutterFormat: (date, culture, localizer) =>
-              localizer.format(date, "h:mm a", culture),
-            eventTimeRangeFormat: ({ start, end }, culture, localizer) =>
-              `${localizer.format(
-                start,
-                "h:mm a",
-                culture
-              )} - ${localizer.format(end, "h:mm a", culture)}`,
-            selectRangeFormat: ({ start, end }, culture, localizer) =>
-              `${localizer.format(
-                start,
-                "h:mm a",
-                culture
-              )} - ${localizer.format(end, "h:mm a", culture)}`,
-            // Add this format for the date range header
-            dayRangeHeaderFormat: ({ start, end }, culture, localizer) =>
-              `${localizer.format(start, "MMMM dd, yyyy")} – ${localizer.format(
-                end,
-                "dd, yyyy"
-              )}`,
-          }}
+          formats={calendarFormats}
           components={{
             timeSlotWrapper: ({ children, value }) => (
               <div title={format(value, "h:mm a")} className="custom-time-slot">
@@ -508,7 +540,3 @@ const AppointmentsPage = () => {
 };
 
 export default AppointmentsPage;
-
-
-
-
