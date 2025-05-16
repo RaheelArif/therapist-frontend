@@ -36,6 +36,7 @@ const AdminHeader = () => {
         justifyContent: 'flex-end',
         alignItems: 'center'
       }}
+      className='header-tbc'
     >
       <Dropdown menu={{ items }} placement="bottomRight">
         <Space className="cursor-pointer">

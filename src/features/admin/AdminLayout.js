@@ -17,6 +17,7 @@ const AdminLayout = ({ children }) => {
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 768);
     };
+   
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
@@ -47,7 +48,7 @@ const AdminLayout = ({ children }) => {
 
       <AntLayout>
         <AdminHeader />
-        <Content className="admin-layout-content-area">
+        <Content  className={`admin-layout-content-area ${location.pathname ==='/admin/add-appointment' ? " zero-padding-c" :""}`}>
           {children}
         </Content>
       </AntLayout>

@@ -346,8 +346,8 @@
 }
 .my-calendar {
 }
-.ant-menu .ant-menu-item-selected{
-  color: black  !important;
+.ant-menu .ant-menu-item-selected {
+  color: black !important;
 }
 
 .my-calendar .offline-date {
@@ -382,12 +382,10 @@
 .ant-calendar-selected-day .ant-calendar-date {
   background: #90ee90; /* Light green */
 }
-
-.admin-layout-content-area {
-  background-color: #efefef00;
+.admin-layout-content-area{
   padding: 20px 40px;
 }
-.date-cell-c11{
+.date-cell-c11 {
   width: 90% !important;
   height: 100%;
   margin-left: 5%;
@@ -419,9 +417,32 @@
     padding: 10px 20px;
     height: 100%;
   }
+  .admin-layout-content-area.zero-padding-c {
+    padding: 10px 0px;
+  }
   .custom-title-c {
     display: flex;
     align-items: center;
     justify-content: space-between;
+  }
+  .sidebar-ca {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  .ant-drawer-body aside {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  .logo-area-c > img {
+    width: 250px !important;
+    margin: 0 auto;
+  }
+  .header-tbc {
+    position: fixed;
+    width: 100%;
+    z-index: 100;
+  }
+  .admin-layout-content-area {
+    margin-top: 100px;
   }
 }

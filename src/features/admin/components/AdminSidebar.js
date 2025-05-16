@@ -72,7 +72,7 @@ const AdminSidebar = ({ onNavigate }) => {
   };
 
   return (
-    <Sider style={{ backgroundColor: "white" }}>
+    <Sider style={{ backgroundColor: "white" , }}>
       <div className="logo-area-c" onClick={() => navigate("/admin")}>
         <img
           src={logo}
@@ -89,6 +89,7 @@ const AdminSidebar = ({ onNavigate }) => {
           if (onNavigate) onNavigate(); // Close drawer if mobile
         }}
         selectedKeys={getSelectedKey()}
+        className="sidebar-ca"
       />
     </Sider>
   );

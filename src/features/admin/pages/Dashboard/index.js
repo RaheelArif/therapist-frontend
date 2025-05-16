@@ -87,7 +87,7 @@ const DashboardPage = () => {
                 hoverable
                 className={`h-full transform transition-all duration-300 hover:scale-105 hover:shadow-lg`}
                 style={{
-                  borderRadius: "16px",
+                  borderRadius: "0px",
                   border: "none",
                   overflow: "hidden",
                 }}
