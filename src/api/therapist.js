@@ -5,12 +5,14 @@ export const getTherapists = async ({
   fullname = "",
   page = 1,
   pageSize = 10,
+  therapistType,
 } = {}) => {
   const response = await axios.get("/admin/get-therapist", {
     params: {
       fullname,
       page,
       limit: pageSize,
+      therapistType,
     },
   });
   return response.data;
