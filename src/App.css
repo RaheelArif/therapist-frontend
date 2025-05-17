@@ -445,4 +445,8 @@
   .admin-layout-content-area {
     margin-top: 100px;
   }
+  .form-items-bx{
+    flex-direction: row !important;
+    overflow-x: auto;
+  }
 }

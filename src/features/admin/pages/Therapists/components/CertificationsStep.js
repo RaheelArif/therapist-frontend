@@ -47,7 +47,7 @@ const CertificationsStep = ({ form }) => {
                   {...restField}
                   name={[name, 'title']}
                   label="Certification Title"
-                  rules={[{ required: true, message: 'Title is required' }]}
+                  // rules removed
                 >
                   <Input />
                 </Form.Item>
@@ -56,7 +56,7 @@ const CertificationsStep = ({ form }) => {
                   {...restField}
                   name={[name, 'issuer']}
                   label="Issuing Organization"
-                  rules={[{ required: true, message: 'Issuer is required' }]}
+                  // rules removed
                 >
                   <Input />
                 </Form.Item>
@@ -66,7 +66,7 @@ const CertificationsStep = ({ form }) => {
                     {...restField}
                     name={[name, 'issueDate']}
                     label="Issue Date"
-                    rules={[{ required: true, message: 'Issue date is required' }]}
+                    // rules removed
                     style={{ width: '100%' }}
                   >
                     <DatePicker style={{ width: '100%' }} />
@@ -95,8 +95,10 @@ const CertificationsStep = ({ form }) => {
                   name={[name, 'attachmentUrl']}
                   label="Certificate Document"
                 >
-                  <Input 
+                  <Input
                     readOnly
+                    placeholder="Upload a file to see its URL here"
+                    value={form.getFieldValue(['certifications', name, 'attachmentUrl']) || ''}
                     addonBefore={
                       <Upload
                         maxCount={1}
@@ -104,7 +106,7 @@ const CertificationsStep = ({ form }) => {
                         beforeUpload={(file) => handleUpload(file, name)}
                         accept=".pdf,.jpg,.jpeg,.png"
                       >
-                        <Button 
+                        <Button
                           icon={uploadingFields.has(name) ? <LoadingOutlined /> : <UploadOutlined />}
                           disabled={uploadingFields.has(name)}
                         >

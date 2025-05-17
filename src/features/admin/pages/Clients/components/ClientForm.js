@@ -246,7 +246,7 @@ const ClientForm = ({ onFinish, loading = false, initialValues }) => {
               Load Test Values
           </Button>
       </div>
-      <Steps current={current} style={{ marginBottom: 24 }}>
+      <Steps className='form-items-bx' current={current} style={{ marginBottom: 24 }}>
         {steps.map((item) => (
           <Step key={item.title} title={item.title} />
         ))}
