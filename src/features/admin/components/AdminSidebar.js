@@ -35,6 +35,17 @@ const AdminSidebar = ({ onNavigate }) => {
       label: "Therapists",
     },
     {
+      key: "/admin/psychologist",
+      icon: <TeamOutlined />,
+      label: "Psychologist",
+    },
+    {
+      key: "/admin/shadow-teacher",
+      icon: <TeamOutlined />,
+      label: "Shadow Teacher",
+    },
+    
+    {
       key: "/admin/admins",
       icon: <TeamOutlined />,
       label: "Admins",

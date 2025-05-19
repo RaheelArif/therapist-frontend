@@ -1,13 +1,13 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import {
-  getTherapists, // Assuming this can fetch shadow teachers by type
-  createTherapist, // Assuming this can create a shadow teacher if therapistType is provided
-  deleteTherapist, // Assuming this can delete a shadow teacher
-} from "../../api/therapist"; // Adjust path if your API functions are in a different file or structure
+  getTherapists, // API function
+  createTherapist, // API function
+  deleteTherapist, // API function
+} from "../../api/therapist"; // Adjust path as needed
 
 const initialState = {
-  shadowTeachers: [], // Changed
-  status: "idle", // 'idle' | 'loading' | 'succeeded' | 'failed'
+  therapists: [], // Generic name for the list, but will hold shadow teachers
+  status: "idle",
   error: null,
   pagination: {
     current: 1,
@@ -16,51 +16,52 @@ const initialState = {
   },
 };
 
-// Fetch Shadow Teachers
-export const fetchShadowTeachers = createAsyncThunk(
-  "shadowTeacher/fetchShadowTeachers", // Unique action type
+// Fetch Shadow Teachers (internal thunk name can be specific, action type prefix is key)
+export const fetchTherapists = createAsyncThunk( // Generic export name
+  "shadowTeacher/fetchTherapists", // <<<< UNIQUE ACTION TYPE PREFIX FOR SHADOW TEACHERS
   async ({ fullname = "", page = 1, pageSize = 10 }) => {
     const response = await getTherapists({
       fullname,
       page,
       pageSize,
-      therapistType: "Shadow_Teacher", // Hardcoded type
+      therapistType: "Shadow_Teacher", // Hardcoded type for this slice
     });
-    return response; // Expects { data: [], page: number, limit: number, totalRecords: number }
+    return response;
   }
 );
 
 // Add New Shadow Teacher
-export const addNewShadowTeacher = createAsyncThunk(
-  "shadowTeacher/addNewShadowTeacher", // Unique action type
-  async (shadowTeacherData) => {
-    // Ensure shadowTeacherData includes { ..., therapistType: "Shadow_Teacher" }
-    const response = await createTherapist(shadowTeacherData);
+export const addNewTherapist = createAsyncThunk( // Generic export name
+  "shadowTeacher/addNewTherapist", // <<<< UNIQUE ACTION TYPE PREFIX
+  async (therapistData) => {
+    // Ensure therapistData includes { ..., therapistType: "Shadow_Teacher" } for the API
+    const response = await createTherapist(therapistData);
     return response;
   }
 );
 
 // Remove Shadow Teacher
-export const removeShadowTeacher = createAsyncThunk(
-  "shadowTeacher/removeShadowTeacher", // Unique action type
+export const removeTherapist = createAsyncThunk( // Generic export name
+  "shadowTeacher/removeTherapist", // <<<< UNIQUE ACTION TYPE PREFIX
   async (id) => {
-    await deleteTherapist(id); // Assuming therapistId is sufficient
+    await deleteTherapist(id);
     return id;
   }
 );
 
 const shadowTeacherSlice = createSlice({
-  name: "shadowTeacher", // Slice name
+  name: "shadowTeacher", // <<<< Internal slice name (key in rootReducer)
   initialState,
   reducers: {
-    setShadowTeacherPagination: (state, action) => { // Renamed
+    // Generic names for actions
+    setPagination: (state, action) => {
       state.pagination = {
         ...state.pagination,
         ...action.payload,
       };
     },
-    resetShadowTeachers: (state) => { // Renamed
-      state.shadowTeachers = []; // Changed
+    resetTherapists: (state) => {
+      state.therapists = []; // Operates on this slice's 'therapists' (which are shadow teachers)
       state.status = "idle";
       state.error = null;
       state.pagination = {
@@ -73,62 +74,57 @@ const shadowTeacherSlice = createSlice({
   extraReducers(builder) {
     builder
       // Fetch Shadow Teachers
-      .addCase(fetchShadowTeachers.pending, (state) => {
+      .addCase(fetchTherapists.pending, (state) => {
         state.status = "loading";
         state.error = null;
       })
-      .addCase(fetchShadowTeachers.fulfilled, (state, action) => {
+      .addCase(fetchTherapists.fulfilled, (state, action) => {
         state.status = "succeeded";
-        state.shadowTeachers = action.payload.data; // Changed
+        state.therapists = action.payload.data; // Populates this slice's 'therapists'
         state.pagination = {
           current: Number(action.payload.page) || 1,
           pageSize: Number(action.payload.limit) || 10,
           total: Number(action.payload.totalRecords) || 0,
         };
       })
-      .addCase(fetchShadowTeachers.rejected, (state, action) => {
+      .addCase(fetchTherapists.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.error.message;
       })
       // Add New Shadow Teacher
-      .addCase(addNewShadowTeacher.pending, (state) => {
+      .addCase(addNewTherapist.pending, (state) => {
         state.status = "loading";
         state.error = null;
       })
-      .addCase(addNewShadowTeacher.fulfilled, (state, action) => {
-        state.status = "succeeded"; // Or 'idle'
-        // Optionally, add to state:
-        // state.shadowTeachers.push(action.payload);
-        // state.pagination.total += 1;
+      .addCase(addNewTherapist.fulfilled, (state, action) => {
+        state.status = "idle"; // <<<< CHANGED TO IDLE to trigger re-fetch
       })
-      .addCase(addNewShadowTeacher.rejected, (state, action) => {
+      .addCase(addNewTherapist.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.error.message;
       })
       // Remove Shadow Teacher
-      .addCase(removeShadowTeacher.pending, (state) => {
+      .addCase(removeTherapist.pending, (state) => {
         state.status = "loading";
         state.error = null;
       })
-      .addCase(removeShadowTeacher.fulfilled, (state, action) => {
-        state.status = "succeeded"; // Or 'idle'
-        // Optionally, remove from local state:
-        // state.shadowTeachers = state.shadowTeachers.filter(st => st.id !== action.payload);
-        // state.pagination.total = Math.max(0, state.pagination.total - 1);
+      .addCase(removeTherapist.fulfilled, (state, action) => {
+        state.status = "idle"; // <<<< CHANGED TO IDLE to trigger re-fetch
       })
-      .addCase(removeShadowTeacher.rejected, (state, action) => {
+      .addCase(removeTherapist.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.error.message;
       });
   },
 });
 
-export const { setShadowTeacherPagination, resetShadowTeachers } = shadowTeacherSlice.actions; // Renamed
+export const { setPagination, resetTherapists } = shadowTeacherSlice.actions; // Export generic names
 
-// Selectors
-export const selectAllShadowTeachers = (state) => state.shadowTeacher.shadowTeachers;
-export const selectShadowTeacherStatus = (state) => state.shadowTeacher.status;
-export const selectShadowTeacherError = (state) => state.shadowTeacher.error;
-export const selectShadowTeacherPagination = (state) => state.shadowTeacher.pagination;
+// Selectors - use generic names
+// The `state.shadowTeacher` part is crucial and comes from how you combine reducers in the store
+export const selectTherapists = (state) => state.shadowTeacher.therapists;
+export const selectTherapistStatus = (state) => state.shadowTeacher.status;
+export const selectTherapistError = (state) => state.shadowTeacher.error;
+export const selectTherapistPagination = (state) => state.shadowTeacher.pagination;
 
 export default shadowTeacherSlice.reducer;
