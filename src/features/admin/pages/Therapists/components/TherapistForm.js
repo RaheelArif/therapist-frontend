@@ -29,13 +29,13 @@ const defaultValues = {
 
   // Certifications
   certifications: [
-    {
-      title: "Clinical Psychology License",
-      issuer: "State Board of Psychology",
-      issueDate: moment("2015-01-01"),
-      expirationDate: moment("2025-01-01"),
-      description: "Licensed Clinical Psychologist",
-    },
+    // {
+    //   title: "Clinical Psychology License",
+    //   issuer: "State Board of Psychology",
+    //   issueDate: moment("2015-01-01"),
+    //   expirationDate: moment("2025-01-01"),
+    //   description: "Licensed Clinical Psychologist",
+    // },
   ],
 
   // Schedule
