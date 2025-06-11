@@ -9,23 +9,28 @@ import {
   Space,
   Tabs,
   Input,
-} from "antd"; // Import Input
-import { useSelector } from "react-redux";
+} from "antd";
+import { useSelector, useDispatch } from "react-redux";
 import { getAppointments } from "../../api/appointment";
+import { updateTherapist } from "../../api/therapist"; // Import updateTherapist API
 import ChangeStatusModal from "./components/ChangeStatusModal";
 import AddDocumentsModal from "./components/AddDocumentsModal";
 import ViewNotesModal from "./components/ViewNotesModal";
 import FileViewerModal from "./components/FileViewerModal";
 import ClientDetails from "./components/ClientDetails";
 import TherapistOfflineDateManager from "./components/TherapistOfflineDateManager";
+import EditTherapistForm from "./components/EditTherapistForm";
+import { updateTherapistProfile } from "../auth/authSlice";
 
 const { Option } = Select;
 
 const TherapistDashboard = () => {
   const { user } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
   const [statusFilter, setStatusFilter] = useState("ALL");
-  const [clientNameFilter, setClientNameFilter] = useState(""); // New state for client name filter
+  const [clientNameFilter, setClientNameFilter] = useState("");
   const [loading, setLoading] = useState(false);
+  const [fetchA, setfetchA] = useState(0);
   const [appointments, setAppointments] = useState([]);
   const [selectedStatusAppointment, setSelectedStatusAppointment] =
     useState(null);
@@ -53,7 +58,7 @@ const TherapistDashboard = () => {
     };
 
     fetchAppointments();
-  }, [user?.user?.therapist?.id]);
+  }, [user?.user?.therapist?.id , fetchA]);
 
   const getStatusColor = (status) => {
     const colors = {
@@ -72,6 +77,116 @@ const TherapistDashboard = () => {
   const handleViewFile = (record) => {
     setSelectedFileAppointment(record);
   };
+
+  const handleUpdateProfile = async (values) => {
+    const therapistId = user?.user?.therapist?.id;
+    console.log("therapistId:", therapistId);
+    console.log("values before filtering:", values);
+
+    if (!therapistId || typeof therapistId !== "string") {
+      message.error("Therapist ID is missing or invalid");
+      return;
+    }
+
+    // Filter values to include only allowed fields
+    const allowedFields = [
+      "fullName",
+      "experience",
+      "bio",
+      "dateOfBirth",
+      "contactNumber",
+      "languagesSpoken",
+      "specializations",
+      "certifications",
+      "workAddress",
+      "availableHours",
+      "profilePicture",
+    ];
+    const filteredValues = Object.keys(values)
+      .filter((key) => allowedFields.includes(key))
+      .reduce((obj, key) => {
+        obj[key] = values[key];
+        return obj;
+      }, {});
+
+    console.log("filteredValues:", filteredValues);
+
+    try {
+      // Call the updateTherapist API
+      const response = await updateTherapist(therapistId, filteredValues);
+      console.log("updateTherapist response:", response);
+
+      // Transform response to match updateTherapistProfile payload
+      const updatedData = {
+        therapistId,
+        fullName: response.fullname,
+        experience: response.therapist.experience,
+        bio: response.therapist.bio,
+        dateOfBirth: response.therapist.dateOfBirth,
+        contactNumber: response.therapist.contactNumber,
+        languagesSpoken: response.therapist.languagesSpoken,
+        specializations: response.therapist.specializations,
+        certifications: response.therapist.certifications,
+        workAddress: response.therapist.workAddress,
+        availableHours: response.therapist.availableHours,
+        profilePicture: response.therapist.profilePicture,
+        isOnline: response.therapist.isOnline,
+        offlineDates: response.therapist.offlineDates,
+        therapistType: response.therapist.therapistType,
+      };
+
+      // Dispatch updateTherapistProfile to update therapist data
+      await dispatch(updateTherapistProfile(updatedData)).unwrap();
+
+      // Manually update localStorage to sync entire user object
+      const updatedUser = {
+        ...user,
+        fullname: response.fullname,
+        user: {
+          ...user.user,
+          fullname: response.fullname,
+          therapist: {
+            ...user.user.therapist,
+            ...response.therapist,
+            fullName: response.fullname,
+          },
+        },
+        therapist: {
+          ...user.therapist,
+          ...response.therapist,
+          fullName: response.fullname,
+        },
+      };
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+      console.log("Updated localStorage user:", updatedUser);
+
+      // Update Redux state without triggering logout
+      dispatch({
+        type: "auth/updateUser",
+        payload: {
+          ...user,
+          user: {
+            ...user.user,
+            fullname: response.fullname,
+            therapist: {
+              ...user.user.therapist,
+              ...response.therapist,
+              fullName: response.fullname,
+            },
+          },
+        },
+      });
+
+      setfetchA(fetchA + 1);
+      message.success("Profile updated successfully");
+    } catch (error) {
+      console.error("Profile update error:", error);
+      message.error(
+        "Failed to update profile: " + (error.message || "Unknown error")
+      );
+    }
+  };
+
   const columns = [
     {
       title: "Client Name",
@@ -213,10 +328,35 @@ const TherapistDashboard = () => {
       label: "Manage Offline Dates",
       children: <TherapistOfflineDateManager />,
     },
+    {
+      key: "updateProfile",
+      label: "Update Profile",
+      children: (
+        <Card title="Update Profile">
+          <EditTherapistForm
+            onFinish={handleUpdateProfile}
+            loading={loading}
+            initialValues={{
+              fullName: user?.user?.fullname,
+              experience: user?.user?.therapist?.experience,
+              bio: user?.user?.therapist?.bio,
+              dateOfBirth: user?.user?.therapist?.dateOfBirth,
+              contactNumber: user?.user?.therapist?.contactNumber,
+              languagesSpoken: user?.user?.therapist?.languagesSpoken,
+              specializations: user?.user?.therapist?.specializations,
+              certifications: user?.user?.therapist?.certifications,
+              workAddress: user?.user?.therapist?.workAddress,
+              availableHours: user?.user?.therapist?.availableHours,
+              profilePicture: user?.user?.therapist?.profilePicture,
+            }}
+          />
+        </Card>
+      ),
+    },
   ];
 
   return (
-    <div className="p-6">
+    <div className="">
       <Tabs items={tabItems} />
 
       {/* Modals (outside Tabs to avoid unmounting) */}

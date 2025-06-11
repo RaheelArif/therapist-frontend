@@ -10,7 +10,7 @@ const TherapistLayout = ({ children }) => {
     <Layout style={{ minHeight: '100vh' }}>
       <Layout>
         <TherapistHeader />
-        <Content style={{ margin: '24px 16px', padding: 24 }}>
+        <Content style={{marginTop:"0px"}} className='admin-layout-content-area'>
           {children}
         </Content>
       </Layout>

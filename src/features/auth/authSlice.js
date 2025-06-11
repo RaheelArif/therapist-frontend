@@ -52,6 +52,10 @@ const authSlice = createSlice({
       state.role = null;
       state.isAuthenticated = false;
     },
+    updateUser: (state, action) => {
+      state.user = action.payload;
+      localStorage.setItem("user", JSON.stringify(action.payload));
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -92,7 +96,7 @@ const authSlice = createSlice({
         if (state.user?.user?.therapist) {
           state.user.user.therapist = {
             ...state.user.user.therapist,
-            ...action.payload
+            ...action.payload,
           };
           // Update localStorage
           localStorage.setItem("user", JSON.stringify(state.user));
@@ -101,5 +105,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { logout } = authSlice.actions;
+export const { logout, updateUser } = authSlice.actions;
 export default authSlice.reducer;
