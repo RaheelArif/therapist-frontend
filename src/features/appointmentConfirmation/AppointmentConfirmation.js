@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Card, Tag, Spin, message, Input, Button, Row, Col, Timeline, List, Typography } from 'antd';
+import { Card, Tag, Spin, message, Input, Button, Row, Col, Timeline, List, Typography, Space } from 'antd';
 import { getAppointmentById, createClientNote } from '../../api/appointment';
 import dayjs from 'dayjs';
-import { 
-  ClockCircleOutlined, 
+import {
+  ClockCircleOutlined,
   CalendarOutlined,
   UserOutlined,
   FileTextOutlined,
   SendOutlined,
-  DownloadOutlined
+  // DownloadOutlined, // Removed, now only needed in the document component
 } from '@ant-design/icons';
+
+// Import the new document display component
+import AppointmentDocumentsDisplay from './components/AppointmentDocumentsDisplay'; // Adjust the path if needed
 
 const { TextArea } = Input;
 const { Text } = Typography;
@@ -21,6 +24,9 @@ const AppointmentConfirmation = () => {
   const [note, setNote] = useState('');
   const [pageLoading, setPageLoading] = useState(true);
   const [submitLoading, setSubmitLoading] = useState(false);
+
+  // --- Removed getFileType and renderFile from here ---
+  // These functions are now inside AppointmentDocumentsDisplay.js
 
   useEffect(() => {
     const fetchAppointment = async () => {
@@ -55,15 +61,16 @@ const AppointmentConfirmation = () => {
       message.warning('Please enter a note');
       return;
     }
-  
+
     try {
       setSubmitLoading(true);
       await createClientNote(appointmentId, { content: note });
-      
+
       // Refresh appointment data to get updated notes
+      // We also get updated documents if any were added elsewhere, though this page is read-only for docs
       const updatedAppointment = await getAppointmentById(appointmentId);
       setAppointment(updatedAppointment);
-      
+
       message.success('Note added successfully');
       setNote('');
     } catch (error) {
@@ -97,7 +104,7 @@ const AppointmentConfirmation = () => {
   }
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="p-6 max-w-4xl confirm-scren-p mx-auto">
       <Card
         title={
           <div className="flex items-center justify-between">
@@ -144,7 +151,7 @@ const AppointmentConfirmation = () => {
                     {new Date(appointment.startTime).toLocaleTimeString([], {
                       hour: '2-digit',
                       minute: '2-digit'
-                    })} 
+                    })}
                     {' - '}
                     {new Date(appointment.endTime).toLocaleTimeString([], {
                       hour: '2-digit',
@@ -170,55 +177,16 @@ const AppointmentConfirmation = () => {
             </Card>
           </Col>
 
+          {/* Documents - Now using the separate component */}
+          <Col span={24}>
+            <AppointmentDocumentsDisplay documents={appointment.documents} />
+          </Col>
+
           {/* Client Notes History */}
-      
-
-          {/* Documents */}
-          {appointment.documents?.length > 0 && (
+          {appointment.clientNotes?.length > 0 && (
             <Col span={24}>
-              <Card 
-                type="inner" 
-                title={
-                  <div className="flex items-center gap-2">
-                    <FileTextOutlined />
-                    <span>Documents</span>
-                  </div>
-                }
-              >
-                <List
-                  header={<Text strong>Previous Documents</Text>}
-                  bordered
-                  dataSource={appointment.documents}
-                  renderItem={(doc) => (
-                    <List.Item
-                      actions={[
-                        doc.pdfLink ? (
-                          <Button
-                            type="link"
-                            href={doc.pdfLink}
-                            target="_blank"
-                            icon={<DownloadOutlined />}
-                          >
-                            Download
-                          </Button>
-                        ) : null,
-                      ]}
-                    >
-                      <List.Item.Meta
-                        title={`Notes: ${doc.notes || 'No notes provided'}`}
-                        description={`Added on: ${new Date(doc.createdAt).toLocaleString()}`}
-                      />
-                    </List.Item>
-                  )}
-                />
-              </Card>
-            </Col>
-          )}
-
-{appointment.clientNotes?.length > 0 && (
-            <Col span={24}>
-              <Card 
-                type="inner" 
+              <Card
+                type="inner"
                 title={
                   <div className="flex items-center gap-2">
                     <FileTextOutlined />
@@ -229,6 +197,7 @@ const AppointmentConfirmation = () => {
                 <Timeline
                   mode="left"
                   items={appointment.clientNotes.map((note) => ({
+                    key: note.id, // Added key for list stability
                     children: (
                       <div className="bg-gray-50 p-4 rounded-lg">
                         <div className="text-gray-600 mb-2">
@@ -246,10 +215,11 @@ const AppointmentConfirmation = () => {
               </Card>
             </Col>
           )}
+
           {/* Add Client Notes Section */}
           <Col span={24}>
-            <Card 
-              type="inner" 
+            <Card
+              type="inner"
               title={
                 <div className="flex items-center gap-2">
                   <FileTextOutlined />
@@ -265,8 +235,8 @@ const AppointmentConfirmation = () => {
                 className="mb-4"
                 disabled={submitLoading}
               />
-              <Button 
-                type="primary" 
+              <Button
+                type="primary"
                 icon={<SendOutlined />}
                 onClick={handleAddNote}
                 className="float-right"

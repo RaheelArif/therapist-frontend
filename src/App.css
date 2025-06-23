@@ -394,7 +394,16 @@
   max-height: 400px;
   overflow-y: auto;
   margin: 20px 0px;
-
+}
+.confirm0b-imgc{
+  display: flex;
+  flex-direction: column;
+}
+.txt-confirm-dt{
+  display: flex ;
+  justify-content: flex-end;
+  font-size: 12px;
+  margin-top: 10px;
 }
 /* Responsive */
 @media (max-width: 768px) {
@@ -466,6 +475,9 @@
     left: 0;
   }
   .top-zero-m .ant-modal-content {
+    padding: 10px;
+  }
+  .confirm-scren-p .ant-card-body {
     padding: 10px;
   }
 }
