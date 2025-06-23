@@ -145,7 +145,7 @@ const TherapistsPage = () => {
   ];
 
   return (
-    <div className="p-6">
+    <div className="p-6 therapist-mn-ad-p">
       <div className="mb-6  custom-title-c flex justify-between items-center">
         <h2 className="text-2xl font-semibold">Therapists</h2>
         <Button

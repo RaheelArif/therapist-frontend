@@ -395,15 +395,54 @@
   overflow-y: auto;
   margin: 20px 0px;
 }
-.confirm0b-imgc{
+.confirm0b-imgc {
   display: flex;
   flex-direction: column;
 }
-.txt-confirm-dt{
-  display: flex ;
+.txt-confirm-dt {
+  display: flex;
   justify-content: flex-end;
   font-size: 12px;
   margin-top: 10px;
+}
+.add-p-btnsc {
+  display: flex;
+
+  width: 100%;
+}
+.add-p-btnsc button {
+  margin-right: 10px;
+}
+/* If using regular CSS */
+.therapist-btn {
+  background-color: #4CAF50 !important; /* Green */
+  border-color: #4CAF50 !important;
+}
+
+.psychologist-btn {
+  background-color: #2196F3 !important; /* Blue */
+  border-color: #2196F3 !important;
+}
+
+.shadow-teacher-btn {
+  background-color: #bc02a6 !important; /* Orange */
+  border-color: #bc02a6 !important;
+}
+
+/* Hover states */
+.therapist-btn:hover {
+  background-color: #3e8e41 !important;
+  border-color: #3e8e41 !important;
+}
+
+.psychologist-btn:hover {
+  background-color: #0b7dda !important;
+  border-color: #0b7dda !important;
+}
+
+.shadow-teacher-btn:hover {
+  background-color: #8e027d !important; /* Orange */
+  border-color: #8e027d !important;
 }
 /* Responsive */
 @media (max-width: 768px) {
@@ -479,5 +518,13 @@
   }
   .confirm-scren-p .ant-card-body {
     padding: 10px;
+  }
+  .add-p-btnsc {
+    flex-direction: column;
+  }
+  .add-p-btnsc button {
+    margin-bottom: 10px;
+    margin-right: 0px;
+    
   }
 }

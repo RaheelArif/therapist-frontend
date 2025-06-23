@@ -81,7 +81,7 @@ const AppointmentsPage = () => {
   const offlineDates = offlineDatesObject?.offlineDates?.offlineDates || [];
   const offlineDatesStatus = useSelector((state) => state.offlineDates.status);
   const offlineDatesError = useSelector((state) => state.offlineDates.error);
-
+  console.log("selectedTherapist", selectedTherapist);
   useEffect(() => {
     const initializeAppointments = async () => {
       if (selectedTherapist && status === "idle") {
@@ -306,13 +306,19 @@ const AppointmentsPage = () => {
 
     if (event.type === "available") {
       className = "available-slot";
-      style.backgroundColor = "#52c41a"; // Solid green
+      style.backgroundColor = "rgb(133 107 46)"; // Solid green
       style.color = "transparent";
       style.opacity = 0.9;
     } else if (event.type === "appointment") {
       className = "booked-slot";
-      style.backgroundColor = "#1890ff"; // Solid blue
-      style.color = "transparent";
+      style.backgroundColor =
+        selectedTherapist?.therapistType === "Shadow_Teacher"
+          ? "#bc02a6" // Solid blue
+          : selectedTherapist?.therapistType === "Psychologist"
+          ? "#2196F3" // Solid blue
+          : selectedTherapist?.therapistType === "Therapist"
+          ? "#3e8e41" // Solid blue
+          : (style.color = "transparent");
       style.opacity = 0.9;
     }
 
@@ -362,14 +368,32 @@ const AppointmentsPage = () => {
             <p className="text-gray-500 mb-8">
               To view and manage appointments, please select a therapist first
             </p>
-            <Button
-              type="primary"
-              size="large"
-              onClick={() => navigate("/admin/therapists")}
-              className="shadow-md h-12 px-8 text-base"
-            >
-              Go to Therapists Page
-            </Button>
+            <div className="add-p-btnsc">
+              <Button
+                type="primary"
+                size="large"
+                onClick={() => navigate("/admin/therapists")}
+                className="shadow-md h-12 px-8 text-base therapist-btn"
+              >
+                Go to Therapists Page
+              </Button>
+              <Button
+                type="primary"
+                size="large"
+                onClick={() => navigate("/admin/psychologist")}
+                className="shadow-md h-12 px-8 text-base psychologist-btn"
+              >
+                Go to Psychologist Page
+              </Button>
+              <Button
+                type="primary"
+                size="large"
+                onClick={() => navigate("/admin/shadow-teacher")}
+                className="shadow-md h-12 px-8 text-base shadow-teacher-btn"
+              >
+                Go to Shadow Teacher Page
+              </Button>
+            </div>
           </div>
         </Card>
       </div>

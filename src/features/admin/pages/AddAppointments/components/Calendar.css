@@ -359,6 +359,7 @@
     color: #595959;
     font-size: 14px;
   }
+
   /* Responsive Design */
   @media screen and (max-width: 768px) {
     .rbc-toolbar {

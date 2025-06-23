@@ -133,6 +133,7 @@ const Psychologist = () => {
           </Popconfirm>
           <Button
             type="primary"
+            className="psychologist-btn"
             icon={<CalendarOutlined />}
             onClick={() => handleSetAppointment(record)}
             disabled={!record.isOnline} // Simplified a bit
@@ -147,13 +148,13 @@ const Psychologist = () => {
   return (
     <div className="p-6">
       <div className="mb-6  custom-title-c flex justify-between items-center">
-        <h2 className="text-2xl font-semibold">Therapists</h2>
+        <h2 className="text-2xl font-semibold">Psychologist</h2>
         <Button
           type="primary"
           icon={<PlusOutlined />}
-          onClick={() => setModalVisible(true)}
+          onClick={() => setModalVisible(true)} className="psychologist-btn"
         >
-          Add New Therapist
+          Add New Psychologist
         </Button>
       </div>
 
