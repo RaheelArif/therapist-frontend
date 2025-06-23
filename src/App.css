@@ -382,13 +382,19 @@
 .ant-calendar-selected-day .ant-calendar-date {
   background: #90ee90; /* Light green */
 }
-.admin-layout-content-area{
+.admin-layout-content-area {
   padding: 20px 40px;
 }
 .date-cell-c11 {
   width: 90% !important;
   height: 100%;
   margin-left: 5%;
+}
+.docu-areay-c {
+  max-height: 400px;
+  overflow-y: auto;
+  margin: 20px 0px;
+
 }
 /* Responsive */
 @media (max-width: 768px) {
@@ -445,8 +451,21 @@
   .admin-layout-content-area {
     margin-top: 100px;
   }
-  .form-items-bx{
+  .form-items-bx {
     flex-direction: row !important;
     overflow-x: auto;
+  }
+  .admin-layout-content-area.therapist-dashboard-c {
+    padding: 10px;
+  }
+  .admin-layout-content-area.therapist-dashboard-c .ant-card-body {
+    padding: 10px 0px;
+  }
+  .top-zero-m {
+    top: 0;
+    left: 0;
+  }
+  .top-zero-m .ant-modal-content {
+    padding: 10px;
   }
 }

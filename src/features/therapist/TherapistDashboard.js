@@ -41,10 +41,15 @@ const TherapistDashboard = () => {
 
   // Fetch appointments
   useEffect(() => {
+    console.log("fetch11");
     const fetchAppointments = async () => {
+      console.log("fetch112");
+
       if (user?.user?.therapist?.id) {
+        console.log("fetch113");
         try {
           setLoading(true);
+          console.log("fetch114");
           const response = await getAppointments({
             therapistId: user.user.therapist.id,
           });
@@ -58,7 +63,7 @@ const TherapistDashboard = () => {
     };
 
     fetchAppointments();
-  }, [user?.user?.therapist?.id , fetchA]);
+  }, [user?.user?.therapist?.id, fetchA]);
 
   const getStatusColor = (status) => {
     const colors = {
@@ -385,6 +390,7 @@ const TherapistDashboard = () => {
                 apt.id === updatedAppointment.id ? updatedAppointment : apt
               )
             );
+            setfetchA(fetchA + 1);
             setSelectedDocumentAppointment(null);
           }}
         />
